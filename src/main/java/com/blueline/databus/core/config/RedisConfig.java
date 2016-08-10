@@ -19,10 +19,17 @@ public class RedisConfig {
     @Value("${redis.port}")
     private int port;
 
-    public String getDb() {
-        return db;
+    @Value("${redis.db.recordApi}")
+    private int db_recordApi;
+
+    @Value("${redis.db.accessCache}")
+    private int db_accessCache;
+
+    public int getDb_recordApi() {
+        return db_recordApi;
     }
 
-    @Value("${redis.db}")
-    private String db;
+    public int getDb_accessCache() {
+        return db_accessCache;
+    }
 }

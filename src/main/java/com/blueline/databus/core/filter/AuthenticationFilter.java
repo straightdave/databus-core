@@ -14,6 +14,10 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.blueline.databus.core.helper.FilterResponseRender;
+import com.blueline.databus.core.helper.SysDBHelper;
+import com.blueline.databus.core.helper.MACHelper;
+import com.blueline.databus.core.helper.RedisHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
@@ -29,6 +33,9 @@ public class AuthenticationFilter implements Filter {
     @Autowired
     private RedisHelper redisHelper;
 
+    @Autowired
+    private SysDBHelper sysDBHelper;
+
     @Override
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
             throws IOException, ServletException {
@@ -36,19 +43,20 @@ public class AuthenticationFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest)req;
         HttpServletResponse response = (HttpServletResponse)resp;
 
-        // 记录API调用
+        // 记录API调用,不加Query String
         redisHelper.recordAPICall(request.getServletPath());
 
         String mac    = request.getHeader("x-mac");
         String appKey = request.getHeader("x-appkey");
 
-        if (StringUtils.isEmpty(mac)) {
-            RestResult result = new RestResult(ResultType.FAIL, "header: x-appkey missed");
+        if (StringUtils.isEmpty(appKey)) {
+            RestResult result = new RestResult(ResultType.FAIL, "header x-appkey missed");
             FilterResponseRender.render(response, result);
             return;
         }
-        if (StringUtils.isEmpty(appKey)) {
-            RestResult result = new RestResult(ResultType.FAIL, "header: x-mac missed");
+
+        if (StringUtils.isEmpty(mac)) {
+            RestResult result = new RestResult(ResultType.FAIL, "header x-mac missed");
             FilterResponseRender.render(response, result);
             return;
         }
@@ -58,7 +66,7 @@ public class AuthenticationFilter implements Filter {
             skey = adminConfig.getSkey();
         }
         else {
-            skey = redisHelper.getSKey(appKey);
+            skey = sysDBHelper.getSKey(appKey);
         }
 
         if (StringUtils.isEmpty(skey)) {
@@ -84,7 +92,7 @@ public class AuthenticationFilter implements Filter {
         String calculatedMAC = MACHelper.calculateMAC(skey, payload);
         if (!mac.equals(calculatedMAC)) {
             RestResult result = new RestResult(ResultType.FAIL,
-                    String.format("MAC not match. Expect: %s, actual: %s", mac, calculatedMAC));
+                    String.format("MAC not match. Expect: %s, actual: %s", calculatedMAC, mac));
             FilterResponseRender.render(response, result);
             return;
         }

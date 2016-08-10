@@ -5,22 +5,21 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 import com.blueline.databus.core.bean.RestResult;
 import com.blueline.databus.core.bean.ResultType;
-import com.blueline.databus.core.bean.DBHelper;
+import com.blueline.databus.core.helper.DBHelper;
 
 /**
- * 处理所有数据CRUD相关的操作(DML)
+ * 处理数据CRUD相关的操作(DML)
  */
-@CrossOrigin                    /* 应用默认的CORS配置,可以跨域访问 */
-@RestController                 /* 涵盖了Spring MVC中的@ResponseBody和@Controller */
-@RequestMapping("/data")
+@RestController
+@RequestMapping("/api/data")
 public class DMLController {
     private final Logger logger = Logger.getLogger(DMLController.class);
 
@@ -33,19 +32,13 @@ public class DMLController {
     @Autowired
     private DBHelper dbHelper;
 
-    /**
-     * 查询数据表的数据
-     * @param dbName 数据库名
-     * @param realTableName 带有用户名前缀的表名
-     * @return RestResult
-     */
     @RequestMapping(value = "/{dbName}/{realTableName}", method = GET)
-    public RestResult query(
+    public RestResult queryData(
         @PathVariable("dbName") String dbName,
         @PathVariable("realTableName") String realTableName
     ) {
         try {
-            String jsonData = dbHelper.getData(dbName, realTableName, request.getParameterMap());
+            String jsonData = dbHelper.queryData(dbName, realTableName, request.getParameterMap());
 
             // 设置缓存相关参数
             response.setHeader("Cache-Control", "public");
@@ -59,25 +52,19 @@ public class DMLController {
         }
     }
 
-    /*
     @RequestMapping(value = "/{dbName}/{realTableName}", method = DELETE)
-    public RestResult delete(
+    public RestResult deleteData(
         @PathVariable("dbName") String dbName,
         @PathVariable("realTableName") String realTableName
     ) {
-        DBHelper dbHelper = DBHelper.getInstance();
         try {
-            int count = dbHelper.deleteData(dbName, realTableName, request.getQueryString());
+            int count = dbHelper.deleteData(dbName, realTableName, request.getParameterMap());
             if (count > 0) {
-                return new RestResult(ResultType.OK, "delete success!!!");
+                return new RestResult(ResultType.OK, String.format("%d rows deleted", count));
             }
             else{
-                return new RestResult(ResultType.FAIL, "delete failed!!!");
+                return new RestResult(ResultType.FAIL, "nothing deleted");
             }
-        }
-        catch (SQLException ex) {
-            logger.info(ex.getMessage());
-            return new RestResult(ResultType.FAIL, ex.getMessage());
         }
         catch (Exception ex) {
             logger.info(ex.getMessage());
@@ -85,53 +72,43 @@ public class DMLController {
         }
     }
 
-
-    @RequestMapping(value = "/{dbName}/{realTableName}/insert", method = POST)
-    public RestResult insert(
+    @RequestMapping(value = "/{dbName}/{realTableName}", method = POST)
+    public RestResult insertData(
         @PathVariable("dbName") String dbName,
-        @PathVariable("realTableName") String realTableName
+        @PathVariable("realTableName") String realTableName,
+        @RequestBody String jsonBody
     ) {
-        DBHelper dbHelper = DBHelper.getInstance();
-        String body = request.getSession().getAttribute("body").toString();
-
         try {
-            int count = dbHelper.insertData(dbName, realTableName , body);
+            int count = dbHelper.insertData(dbName, realTableName, jsonBody);
             if (count > 0) {
-                logger.info( " insert success ");
-                return new RestResult(ResultType.OK, "insert success!!!");
+                return new RestResult(ResultType.OK, String.format("%s rows inserted by %s", count));
             } else {
-                logger.info(  " insert failed ");
-                return new RestResult(ResultType.FAIL,"insert failed!!!");
+                return new RestResult(ResultType.FAIL, "nothing inserted");
+            }
+        }
+        catch (Exception ex) {
+            logger.info(ex.getMessage());
+            return new RestResult(ResultType.ERROR, ex.getMessage());
+        }
+    }
+
+    @RequestMapping(value = "/{dbName}/{realTableName}/{colName}/{colValue}", method = PUT)
+    public RestResult updateData(
+        @PathVariable("dbName") String dbName,
+        @PathVariable("realTableName") String realTableName,
+        @PathVariable("colName") String colName,
+        @PathVariable("colValue") String colValue
+    ) {
+        try {
+            int count = dbHelper.updateData(dbName,realTableName, colName, colValue, request.getParameterMap());
+            if (count > 0) {
+                return new RestResult(ResultType.OK, String.format("%s rows updated by %s", count));
+            } else {
+                return new RestResult(ResultType.FAIL,"nothing updated");
             }
         } catch (Exception ex) {
-            logger.info( ex.getMessage());
-            return new RestResult(ResultType.ERROR,ex.getMessage());
+            logger.info(ex.getMessage());
+            return new RestResult(ResultType.ERROR, ex.getMessage());
         }
     }
-
-    @RequestMapping(value = "/{dbName}/{realTableName}/update", method = POST)
-    public RestResult update(
-        @PathVariable("dbName") String dbName,
-        @PathVariable("realTableName") String realTableName
-    ) {
-        DBHelper dbHelper = DBHelper.getInstance();
-
-        try {
-            String body = request.getSession().getAttribute("body").toString();
-            int count = dbHelper.updateData(dbName,realTableName, body);
-            if (count > 0) {
-                logger.info(" update success ");
-                return new RestResult(ResultType.OK, "update success!!!");
-            } else {
-                logger.info(" update failed ");
-                return new RestResult(ResultType.FAIL,"update failed!!!");
-            }
-        } catch (SQLException ex) {
-            logger.info(new Date() + "——" + ex.getMessage());
-            return new RestResult(ResultType.FAIL,ex.getMessage());
-        }
-    }
-    */
-
-
 }

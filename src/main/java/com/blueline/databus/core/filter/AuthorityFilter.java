@@ -1,10 +1,9 @@
 package com.blueline.databus.core.filter;
 
 import com.blueline.databus.core.bean.RestResult;
-import com.blueline.databus.core.config.VendorApiConfig;
-import com.blueline.databus.core.bean.FilterResponseRender;
+import com.blueline.databus.core.helper.FilterResponseRender;
+import com.blueline.databus.core.helper.RedisHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -19,7 +18,7 @@ import static com.blueline.databus.core.bean.ResultType.*;
 public class AuthorityFilter implements Filter {
 
     @Autowired
-    private VendorApiConfig vendorApiConfig;
+    private RedisHelper redisHelper;
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
@@ -27,16 +26,11 @@ public class AuthorityFilter implements Filter {
 
         HttpServletRequest request = (HttpServletRequest)req;
 
-        String apiUrl = String.format(
-                "%s?a=%s&n=%s&m=%s",
-                vendorApiConfig.getAccessCheck(),
-                request.getServletPath(),
-                request.getHeader("x-appkey"), // 注意: api应该改为使用appkey
-                request.getMethod());
-
-        RestResult callResult = new RestTemplate().getForObject(apiUrl, RestResult.class);
-
-        if (callResult.getType() == OK) {
+        if (redisHelper.checkAccess(
+                request.getRequestURI(),
+                request.getMethod(),
+                request.getHeader("x-appkey")))
+        {
             chain.doFilter(req, resp);
         }
         else {

@@ -26,7 +26,7 @@ public class DMLControllerTest {
     @Test
     public void get_data_simple() {
         RestResult result = template.getForObject(baseUri + "/data/db1/table1?id=1", RestResult.class);
-        assertEquals(ResultType.FAIL, result.getType());
+        assertEquals(ResultType.FAIL, result.getResultType());
     }
     
 }

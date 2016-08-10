@@ -2,6 +2,8 @@ package com.blueline.databus.core;
 
 import com.blueline.databus.core.filter.AuthenticationFilter;
 import com.blueline.databus.core.filter.AuthorityFilter;
+import com.blueline.databus.core.filter.CorsFilter;
+import com.blueline.databus.core.helper.AclLoader;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -11,7 +13,16 @@ import org.springframework.context.annotation.Bean;
 public class Application  {
 
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+
+        int aclLoaded = AclLoader.getInstance().preloadAcl();
+
+        if (aclLoaded > 0) {
+            System.out.println(String.format("ACL Preload: %s loaded", aclLoaded));
+            SpringApplication.run(Application.class, args);
+        }
+        else {
+            System.err.println("ACL Preload failed, please check logs");
+        }
     }
 
     @Bean
@@ -20,7 +31,7 @@ public class Application  {
         registration.setFilter(authenticationFilter());
         registration.addUrlPatterns("/api/*");
         registration.setName("authenticationFilter");
-        registration.setOrder(1);
+        registration.setOrder(2);
         return registration;
     }
 
@@ -35,7 +46,7 @@ public class Application  {
         registration.setFilter(authorityFilter());
         registration.addUrlPatterns("/api/*");
         registration.setName("authorityFilter");
-        registration.setOrder(2);
+        registration.setOrder(3);
         return registration;
     }
 
@@ -44,4 +55,20 @@ public class Application  {
         return new AuthorityFilter();
     }
 
+
+
+    @Bean
+    public FilterRegistrationBean corsFilterRegistration() {
+        FilterRegistrationBean registration = new FilterRegistrationBean();
+        registration.setFilter(corsFilter());
+        registration.addUrlPatterns("/*");
+        registration.setName("corsFilter");
+        registration.setOrder(1);
+        return registration;
+    }
+
+    @Bean(name="corsFilter")
+    public CorsFilter corsFilter() {
+        return new CorsFilter();
+    }
 }

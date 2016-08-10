@@ -1,15 +1,23 @@
 package com.blueline.databus.core.bean;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.util.StringUtils;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RestResult {
-    private ResultType type;
-    private String msg;
+    @JsonProperty
+    private ResultType resultType;
+
+    @JsonProperty
+    private String message;
+
+    @JsonProperty
     private String ext;
 
     public RestResult(ResultType type, String msg, String ext) {
-        this.type = type;
-        this.msg = msg;
+        this.resultType = type;
+        this.message = msg;
         this.ext = ext;
     }
 
@@ -17,16 +25,14 @@ public class RestResult {
         this(type, msg, "");
     }
 
-    public RestResult(ResultType type) {
-        this(type, "", "");
+    public RestResult() {}
+
+    public ResultType getResultType() {
+        return resultType;
     }
 
-    public ResultType getType() {
-        return type;
-    }
-
-    public String getMsg() {
-        return msg;
+    public String getMessage() {
+        return message;
     }
 
     public String getExt() {
@@ -36,10 +42,10 @@ public class RestResult {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("{");
-        sb.append(String.format("\"ret\":\"%s\"", this.type.toString()));
+        sb.append(String.format("\"resultType\":\"%s\"", this.resultType.toString()));
 
-        if (!StringUtils.isEmpty(this.msg)) {
-            sb.append(String.format(",\"msg\":\"%s\"", this.msg));
+        if (!StringUtils.isEmpty(this.message)) {
+            sb.append(String.format(",\"message\":\"%s\"", this.message));
         }
 
         if (!StringUtils.isEmpty(this.ext)) {
