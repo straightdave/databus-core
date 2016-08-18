@@ -1,52 +1,83 @@
 package com.blueline.databus.core.controller;
 
-import javax.servlet.http.HttpServletRequest;
-
-import com.blueline.databus.core.helper.SQLParser;
+import com.blueline.databus.core.dao.CoreDBDao;
+import com.blueline.databus.core.dao.SysDBDao;
+import com.blueline.databus.core.exception.InternalException;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
-import com.blueline.databus.core.bean.RestResult;
-import com.blueline.databus.core.bean.ResultType;
-import com.blueline.databus.core.helper.DBHelper;
+import com.blueline.databus.core.datatype.RestResult;
+import com.blueline.databus.core.datatype.ResultType;
 
-@CrossOrigin
+import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api/db")
 public class DDLController{
     private final Logger logger = Logger.getLogger(DDLController.class);
-    
+
     @Autowired
     private HttpServletRequest request;
 
     @Autowired
-    private DBHelper dbHelper;
+    private CoreDBDao coreDBDao;
 
-    /**
-     * 建表
-     * POST /api/db/{db_name}
-     * @param dbName
-     * @return
-     */
-    @RequestMapping(value = "/{dbName}", method = POST)
-    public RestResult createDbTable(
+    @Autowired
+    private SysDBDao sysDBDao;
+
+    @RequestMapping(value = "/{dbName}/{tableName}", method = POST)
+    public RestResult createTable(
             @PathVariable("dbName") String dbName,
-            @RequestBody String jsonBody
+            @PathVariable("tableName") String tableName
     ) {
-        try {
-            dbHelper.createTable(dbName, jsonBody);
-            
-            // create 4 interfaces automatically
-            // as well as Accessibility for this user
 
+        try {
+            BufferedReader r = request.getReader();
+            String body = r.lines().collect(Collectors.joining(System.lineSeparator()));
+
+            if (StringUtils.isEmpty(body)) {
+                throw new InternalException("got no request body");
+            }
+
+            String appkey = request.getHeader("x-appkey");
+
+            if (coreDBDao.createTable(dbName, tableName, body) > 0) {
+                // 如果建表成功,添加默认接口
+                if (sysDBDao.doAfterTableCreated(dbName, tableName, appkey) > 0) {
+                    return new RestResult(ResultType.OK, "Table created");
+                }
+            }
+            return new RestResult(ResultType.FAIL, "Table creating failed");
         }
-        catch (Exception ex) {
+        catch (InternalException | IOException ex) {
             logger.error(ex.getMessage());
             return new RestResult(ResultType.ERROR, ex.getMessage());
         }
-        return new RestResult(ResultType.OK, "Table Created");
+    }
+
+    @RequestMapping(value = "/{dbName}/{tableName}", method = DELETE)
+    public RestResult dropTable(
+            @PathVariable("dbName") String dbName,
+            @PathVariable("tableName") String tableName
+    ) {
+
+        try {
+            coreDBDao.dropTable(dbName, tableName);
+
+            // delete table related interfaces
+
+        }
+        catch (InternalException ex) {
+            logger.error(ex.getMessage());
+            return new RestResult(ResultType.ERROR, ex.getMessage());
+        }
+        return new RestResult(ResultType.OK, "Table Dropped");
     }
 }

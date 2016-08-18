@@ -1,6 +1,6 @@
 package com.blueline.databus.core.filter;
 
-import com.blueline.databus.core.bean.RestResult;
+import com.blueline.databus.core.datatype.RestResult;
 import com.blueline.databus.core.helper.FilterResponseRender;
 import com.blueline.databus.core.helper.RedisHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +9,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
-import static com.blueline.databus.core.bean.ResultType.*;
+import static com.blueline.databus.core.datatype.ResultType.*;
 
 /**
  * 这个filter次一级

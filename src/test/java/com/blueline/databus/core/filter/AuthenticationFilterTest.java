@@ -1,10 +1,10 @@
 package com.blueline.databus.core.filter;
 
-import com.blueline.databus.core.helper.SysDBHelper;
+import com.blueline.databus.core.dao.SysDBDao;
 import com.blueline.databus.core.helper.MACHelper;
-import com.blueline.databus.core.bean.RestResult;
-import com.blueline.databus.core.bean.ResultType;
-import com.blueline.databus.core.config.AdminConfig;
+import com.blueline.databus.core.datatype.RestResult;
+import com.blueline.databus.core.datatype.ResultType;
+import com.blueline.databus.core.configtype.AdminConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ public class AuthenticationFilterTest {
     private TestRestTemplate restTemplate = new TestRestTemplate();
 
     @Autowired
-    private SysDBHelper sysDBHelper;
+    private SysDBDao sysDBDao;
 
     @Autowired
 
@@ -94,11 +94,11 @@ public class AuthenticationFilterTest {
 
     @Test
     public void get_skey_from_db_right() {
-        assertNotNull("DBHelper could be autowired", sysDBHelper);
+        assertNotNull("SysDBDao could be autowired", sysDBDao);
 
         // 测试数据中有记录,其appkey味appkey1, skey为skey1
 
-        String skey = sysDBHelper.getSKey("appkey1");
+        String skey = sysDBDao.getSKey("appkey1");
 
         String dummyApi = "http://localhost:8888/api/data/db1/table1?id=1";
         String reqMac = MACHelper.calculateMAC(skey, "/api/data/db1/table1?id=1");

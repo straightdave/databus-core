@@ -1,9 +1,9 @@
 package com.blueline.databus.core.filter;
 
-import com.blueline.databus.core.bean.ResultType;
+import com.blueline.databus.core.datatype.ResultType;
 import com.blueline.databus.core.helper.MACHelper;
-import com.blueline.databus.core.bean.RestResult;
-import com.blueline.databus.core.config.AdminConfig;
+import com.blueline.databus.core.datatype.RestResult;
+import com.blueline.databus.core.configtype.AdminConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

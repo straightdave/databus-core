@@ -6,25 +6,25 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.blueline.databus.core.bean.ColumnInfo;
-import com.blueline.databus.core.config.DefaultConfig;
+import com.blueline.databus.core.datatype.ColumnInfo;
+import com.blueline.databus.core.configtype.DefaultConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 
 /**
- * 将HTTP的query string解析成SQL语句
- * 注意,只在同字段名多值的情况下,用OR连接这几个值,并加括号;其余任何条件间都用AND连接
+ * 将参数解析成SQL语句
  */
 @Component
 public class SQLParser {
+    private DefaultConfig defaultConfig;
 
-    private final DefaultConfig defaultConfig;
-
-    @Autowired
-    private SQLParser(DefaultConfig config) {
-        this.defaultConfig = config;
+    public SQLParser(DefaultConfig defaultConfig) {
+        this.defaultConfig = defaultConfig;
     }
 
     /**
@@ -32,7 +32,7 @@ public class SQLParser {
      * @param paramMap request获取的parameter Map
      * @return SQL查询clause
      */
-    String parseSQL4Select(Map<String, String[]> paramMap) {
+    public String parseSQL4Select(Map<String, String[]> paramMap) {
 	    // 预处理map,确保包含meta参数
         if (!paramMap.containsKey("_by")) {
             // 默认排序字段是id,这要求库中表都应该含有id字段
@@ -120,7 +120,7 @@ public class SQLParser {
      * @param paramMap 从request调用getParamsterMap获取的map
      * @return sql clauses
      */
-    String parseSQL4Delete(Map<String, String[]> paramMap) {
+    public String parseSQL4Delete(Map<String, String[]> paramMap) {
 
         StringBuilder sqlQuery = new StringBuilder("WHERE ");
 
@@ -196,14 +196,18 @@ public class SQLParser {
      *
      * @param columnInfoList 列信息
      * @return sql整句 INSERT INTO `%s`.`%s` (... ) VALUES (...), (...), ...
-     * @throws IOException 因为解析json,可能抛出IOException
      */
-    String parseSQL4Insert(String jsonBody, final List<ColumnInfo> columnInfoList)
-            throws IOException {
+    public String parseSQL4Insert(String jsonBody, final List<ColumnInfo> columnInfoList) {
 
         // 转换HTTP body传来的JSON数组,结构出错则报IOException
         ObjectMapper om = new ObjectMapper();
-        List<Map<String, Object>> inputData = om.readValue(jsonBody, LinkedList.class);
+        List<Map<String, Object>> inputData = null;
+        try {
+            inputData = om.readValue(jsonBody, LinkedList.class);
+        }
+        catch (IOException ex) {
+            System.err.println("fuck cannot wrap request data into json!");
+        }
 
         // 从JSON中收集数据,等待解析成sql的list of maps
         List<Map<String, String>> data_to_be_trans = new LinkedList<>();
@@ -273,7 +277,7 @@ public class SQLParser {
      * @param colValue
      * @return
      */
-    String parseSQL4Update(Map<String, String[]> paramMap, String colName, String colValue) {
+    public String parseSQL4Update(Map<String, String[]> paramMap, String colName, String colValue) {
         StringBuilder sb = new StringBuilder("UPDATE `%s`.`%s` SET ");
         paramMap.forEach((k, v) -> sb.append(String.format("`%s`='%s',", k, v[0])));
         removeLastComma(sb);
@@ -290,8 +294,57 @@ public class SQLParser {
         sb.replace(index_of_last_comma, index_of_last_comma + 1, replacement);
     }
 
-    public String parseSQL4CreateTable(String dbName, String JsonBody) {
+    public String parseCreateTableSQL(String dbName, String tableName, String jsonBody) {
 
-        return "";
+        if (StringUtils.isEmpty(jsonBody)) {
+            System.err.println("fuck I got no json body!");
+        }
+
+        System.out.println(jsonBody);
+
+        List<ColumnInfo> columnInfoList = new LinkedList<>();
+
+        // 转换HTTP body传来的JSON数组,结构出错则报IOException
+        ObjectMapper om = new ObjectMapper();
+        List<Map<String, String>> rawBody = null;
+
+        try {
+            rawBody = om.readValue(jsonBody, List.class);
+        }
+        catch (IOException ex) {
+            System.err.println("fuck cannot wrap request data into json!");
+        }
+
+        rawBody.forEach(map -> {
+            if (map.containsKey("name") && map.containsKey("type")) {
+                String colName = map.get("name");
+                String colType = map.get("type").toUpperCase();
+
+                boolean isNullable = true;
+                if (map.containsKey("nullable")) {
+                    isNullable = map.get("nullable").equalsIgnoreCase("true");
+                }
+
+                columnInfoList.add(new ColumnInfo(colName, colType, isNullable));
+            }
+        });
+
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("CREATE TABLE `%s`.`%s` (`id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,", dbName, tableName));
+
+        columnInfoList.stream()
+                .filter(col -> !col.getName().equalsIgnoreCase("id")) // ignore user-provided id column
+                .forEach(col -> {
+                    sb.append(String.format("`%s` %s%s,", col.getName(), col.getColumnType(), col.isNullable()? " NULL" : ""));
+                });
+
+        removeLastComma(sb, ");");
+        return sb.toString();
+    }
+
+    public String parseDropTableSQL(String dbName, String tableName) {
+        // not use 'IF EXISTS' here to allow exceptions
+        return String.format("DROP TABLE `%s`.`%s`", dbName, tableName);
     }
 }

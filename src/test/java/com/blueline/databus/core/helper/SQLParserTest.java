@@ -1,6 +1,6 @@
 package com.blueline.databus.core.helper;
 
-import com.blueline.databus.core.bean.ColumnInfo;
+import com.blueline.databus.core.datatype.ColumnInfo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,5 +133,28 @@ public class SQLParserTest {
 
         System.out.println(result);
         assertEquals("UPDATE `%s`.`%s` SET `sex`='female',`name`='1' WHERE `id`='10'", result);
+    }
+
+    @Test
+    public void createTable_parse() throws IOException {
+
+        String jsonBody = "[{\"name\":\"col1\",\"type\":\"int unsigned\",\"nullable\":\"true\"}]";
+
+        String result = sqlParser.parseCreateTableSQL("db1", "tb1", jsonBody);
+        assertFalse("SQL should not be blank", StringUtils.isEmpty(result));
+        System.out.println(result);
+    }
+
+    @Test
+    public void createTable_parse_more_complex() throws IOException {
+
+        String jsonBody = "[{\"name\":\"id\",\"type\":\"int unsigned\",\"nullable\":\"true\"}," +
+                "{\"name\":\"id\",\"type\":\"int unsigned\",\"nullable\":\"true\"}," +
+                "{\"name\":\"sex\",\"type\":\"varchar\",\"nullable\":\"false\"}" +
+                "]";
+
+        String result = sqlParser.parseCreateTableSQL("db1", "tb1", jsonBody);
+        assertFalse("SQL should not be blank", StringUtils.isEmpty(result));
+        System.out.println(result);
     }
 }

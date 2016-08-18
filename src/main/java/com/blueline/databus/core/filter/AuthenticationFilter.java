@@ -1,10 +1,9 @@
 package com.blueline.databus.core.filter;
 
-import com.blueline.databus.core.config.AdminConfig;
-import com.blueline.databus.core.bean.*;
+import com.blueline.databus.core.configtype.AdminConfig;
+import com.blueline.databus.core.datatype.*;
 
 import java.io.IOException;
-import java.util.stream.Collectors;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -15,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.blueline.databus.core.helper.FilterResponseRender;
-import com.blueline.databus.core.helper.SysDBHelper;
+import com.blueline.databus.core.dao.SysDBDao;
 import com.blueline.databus.core.helper.MACHelper;
 import com.blueline.databus.core.helper.RedisHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +33,7 @@ public class AuthenticationFilter implements Filter {
     private RedisHelper redisHelper;
 
     @Autowired
-    private SysDBHelper sysDBHelper;
+    private SysDBDao sysDBDao;
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
@@ -43,9 +42,17 @@ public class AuthenticationFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest)req;
         HttpServletResponse response = (HttpServletResponse)resp;
 
-        // 记录API调用,不加Query String
-        redisHelper.recordAPICall(request.getServletPath());
+        if (!request.getReader().ready()) {
+            RestResult result = new RestResult(ResultType.FAIL, "request stream is not ready");
+            FilterResponseRender.render(response, result);
+            return;
+        }
 
+        // 记录API调用,不加 Query String
+        // 这个指令,如果redis没有ready,仅忽略
+        redisHelper.recordAPICall(request.getRequestURI());
+
+        // header 名称大小写无关
         String mac    = request.getHeader("x-mac");
         String appKey = request.getHeader("x-appkey");
 
@@ -66,28 +73,22 @@ public class AuthenticationFilter implements Filter {
             skey = adminConfig.getSkey();
         }
         else {
-            skey = sysDBHelper.getSKey(appKey);
+            skey = sysDBDao.getSKey(appKey);
         }
 
         if (StringUtils.isEmpty(skey)) {
-            RestResult result = new RestResult(ResultType.FAIL, "get no skey");
+            RestResult result = new RestResult(ResultType.FAIL, "get no secure_key by app_key: " + appKey);
             FilterResponseRender.render(response, result);
             return;
         }
 
         // 计算MAC
-        String payload;
-        if ("POST".equalsIgnoreCase(request.getMethod())) {
-            // POST请求,将请求body作为payload进行加密计算
-            payload = req.getReader()
-                         .lines()
-                         .collect(Collectors.joining(System.lineSeparator()));
-        }
-        else {
-            // 其它请求,payload是请求path(带query string)
-            payload = request.getRequestURI() +
-                      (request.getQueryString() != null ? "?" + request.getQueryString() : "");
-        }
+        // payload是 {app key}+{method}+{uri(?query string)}
+        String payload = String.format("%s_%s_%s",
+                appKey,
+                request.getMethod().toUpperCase(),
+                request.getRequestURI() +
+                (request.getQueryString() != null ? "?" + request.getQueryString() : ""));
 
         String calculatedMAC = MACHelper.calculateMAC(skey, payload);
         if (!mac.equals(calculatedMAC)) {

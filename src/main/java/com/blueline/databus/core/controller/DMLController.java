@@ -3,17 +3,15 @@ package com.blueline.databus.core.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.blueline.databus.core.dao.CoreDBDao;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
-import com.blueline.databus.core.bean.RestResult;
-import com.blueline.databus.core.bean.ResultType;
-import com.blueline.databus.core.helper.DBHelper;
+import com.blueline.databus.core.datatype.RestResult;
+import com.blueline.databus.core.datatype.ResultType;
 
 /**
  * 处理数据CRUD相关的操作(DML)
@@ -30,7 +28,7 @@ public class DMLController {
     private HttpServletRequest request;
 
     @Autowired
-    private DBHelper dbHelper;
+    private CoreDBDao coreDBDao;
 
     @RequestMapping(value = "/{dbName}/{realTableName}", method = GET)
     public RestResult queryData(
@@ -38,7 +36,7 @@ public class DMLController {
         @PathVariable("realTableName") String realTableName
     ) {
         try {
-            String jsonData = dbHelper.queryData(dbName, realTableName, request.getParameterMap());
+            String jsonData = coreDBDao.queryData(dbName, realTableName, request.getParameterMap());
 
             // 设置缓存相关参数
             response.setHeader("Cache-Control", "public");
@@ -58,7 +56,7 @@ public class DMLController {
         @PathVariable("realTableName") String realTableName
     ) {
         try {
-            int count = dbHelper.deleteData(dbName, realTableName, request.getParameterMap());
+            int count = coreDBDao.deleteData(dbName, realTableName, request.getParameterMap());
             if (count > 0) {
                 return new RestResult(ResultType.OK, String.format("%d rows deleted", count));
             }
@@ -79,7 +77,7 @@ public class DMLController {
         @RequestBody String jsonBody
     ) {
         try {
-            int count = dbHelper.insertData(dbName, realTableName, jsonBody);
+            int count = coreDBDao.insertData(dbName, realTableName, jsonBody);
             if (count > 0) {
                 return new RestResult(ResultType.OK, String.format("%s rows inserted by %s", count));
             } else {
@@ -100,7 +98,7 @@ public class DMLController {
         @PathVariable("colValue") String colValue
     ) {
         try {
-            int count = dbHelper.updateData(dbName,realTableName, colName, colValue, request.getParameterMap());
+            int count = coreDBDao.updateData(dbName,realTableName, colName, colValue, request.getParameterMap());
             if (count > 0) {
                 return new RestResult(ResultType.OK, String.format("%s rows updated by %s", count));
             } else {

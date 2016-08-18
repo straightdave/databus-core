@@ -1,45 +1,38 @@
 package com.blueline.databus.core.helper;
 
-import com.blueline.databus.core.bean.AclInfo;
+import com.blueline.databus.core.dao.SysDBDao;
+import com.blueline.databus.core.datatype.AclInfo;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.annotation.PostConstruct;
+import org.springframework.stereotype.Component;
 import java.util.List;
 
+@Component
 public class AclLoader {
     private static final Logger logger = Logger.getLogger(AclLoader.class);
 
-    @Autowired
-    private SysDBHelper sysDBHelper;
+    private final SysDBDao sysDBDao;
+
+    private final RedisHelper redisHelper;
 
     @Autowired
-    private RedisHelper redisHelper;
-
-    private static AclLoader instance = null;
-
-    private AclLoader() {}
-
-    public static AclLoader getInstance() {
-        if (instance == null) {
-            return new AclLoader();
-        }
-        return instance;
+    private AclLoader(SysDBDao sysDBDao, RedisHelper redisHelper) {
+        this.sysDBDao = sysDBDao;
+        this.redisHelper = redisHelper;
     }
 
-    @PostConstruct
     public int preloadAcl() {
         try {
-            List<AclInfo> aclList = sysDBHelper.getAclInfo();
+            List<AclInfo> aclList = sysDBDao.getAclInfo();
             return redisHelper.loadAcl(aclList, true); // 清理其它数据,重新加载全部
         }
         catch (Exception ex) {
             logger.error("PreloadAcl: " + ex.getMessage());
+            ex.printStackTrace();
             return -1;
         }
     }
 
-    @PostConstruct
     public int updateAcl(List<AclInfo> aclList) {
         try {
             return redisHelper.loadAcl(aclList);

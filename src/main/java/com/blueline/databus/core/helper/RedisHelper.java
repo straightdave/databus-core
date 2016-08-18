@@ -1,8 +1,8 @@
 package com.blueline.databus.core.helper;
 
-import com.blueline.databus.core.bean.AclInfo;
-import com.blueline.databus.core.config.AdminConfig;
-import com.blueline.databus.core.config.RedisConfig;
+import com.blueline.databus.core.datatype.AclInfo;
+import com.blueline.databus.core.configtype.AdminConfig;
+import com.blueline.databus.core.configtype.RedisConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -143,6 +143,7 @@ public class RedisHelper {
      */
     int loadAcl(List<AclInfo> aclList, boolean cleanUnknown) {
         int count = 0;
+        System.out.println("load acl...");
 
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.select(redisConfig.getDb_accessCache());
@@ -155,6 +156,7 @@ public class RedisHelper {
             logger.error("RedisHelper: loadAcl: " + ex.getMessage());
             flushDB(redisConfig.getDb_accessCache());
             count = -1;
+
         }
         return count;
     }

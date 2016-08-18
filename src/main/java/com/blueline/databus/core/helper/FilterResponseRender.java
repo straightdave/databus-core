@@ -1,6 +1,6 @@
 package com.blueline.databus.core.helper;
 
-import com.blueline.databus.core.bean.RestResult;
+import com.blueline.databus.core.datatype.RestResult;
 
 import java.io.IOException;
 import java.io.PrintWriter;
