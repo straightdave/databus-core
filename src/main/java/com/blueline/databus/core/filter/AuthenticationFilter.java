@@ -1,6 +1,6 @@
 package com.blueline.databus.core.filter;
 
-import com.blueline.databus.core.configtype.AdminConfig;
+import com.blueline.databus.core.dao.ApiRecordService;
 import com.blueline.databus.core.datatype.*;
 
 import java.io.IOException;
@@ -16,8 +16,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.blueline.databus.core.helper.FilterResponseRender;
 import com.blueline.databus.core.dao.SysDBDao;
 import com.blueline.databus.core.helper.MACHelper;
-import com.blueline.databus.core.helper.RedisHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 
 /**
@@ -26,11 +26,14 @@ import org.springframework.util.StringUtils;
  */
 public class AuthenticationFilter implements Filter {
 
-    @Autowired
-    private AdminConfig adminConfig;
+    @Value("${admin.appkey}")
+    private String adminAppKey;
+
+    @Value("${admin.skey}")
+    private String adminSKey;
 
     @Autowired
-    private RedisHelper redisHelper;
+    private ApiRecordService apiRecordService;
 
     @Autowired
     private SysDBDao sysDBDao;
@@ -44,7 +47,7 @@ public class AuthenticationFilter implements Filter {
 
         // 记录API调用,不加 Query String
         // 这个指令,如果redis没有ready,仅忽略
-        redisHelper.recordAPICall(request.getRequestURI());
+        apiRecordService.recordAPICall(request.getRequestURI());
 
         // header 名称大小写无关
         String mac    = request.getHeader("x-mac");
@@ -63,8 +66,8 @@ public class AuthenticationFilter implements Filter {
         }
 
         String skey;
-        if (appKey.equals(adminConfig.getAppkey())) {
-            skey = adminConfig.getSkey();
+        if (appKey.equals(adminAppKey)) {
+            skey = adminSKey;
         }
         else {
             skey = sysDBDao.getSKey(appKey);

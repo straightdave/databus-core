@@ -8,7 +8,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import redis.clients.jedis.JedisPoolConfig;
 
 @Configuration
-public class AclCacheRedisSource {
+public class ApiRecordingRedisSource {
 
     @Value("${redis.host}")
     private String host;
@@ -16,20 +16,20 @@ public class AclCacheRedisSource {
     @Value("${redis.port}")
     private int port;
 
-    @Value("${redis.db.accessCache}")
-    private int db_accessCache;
+    @Value("${redis.db.recordApi}")
+    private int db_recordApi;
 
-    @Bean(name = "redis4Acl")
+    @Bean(name = "redis4Record")
     public JedisConnectionFactory jedisConnectionFactory() {
         JedisConnectionFactory factory = new JedisConnectionFactory(new JedisPoolConfig());
         factory.setHostName(host);
         factory.setPort(port);
-        factory.setDatabase(db_accessCache);
+        factory.setDatabase(db_recordApi);
         return factory;
     }
 
-    @Bean(name = "redisTemplate4Acl")
-    public StringRedisTemplate stringRedisTemplate(JedisConnectionFactory redis4Acl){
-        return new StringRedisTemplate(redis4Acl);
+    @Bean(name = "redisTemplate4Record")
+    public StringRedisTemplate stringRedisTemplate(JedisConnectionFactory redis4Record){
+        return new StringRedisTemplate(redis4Record);
     }
 }

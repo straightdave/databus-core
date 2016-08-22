@@ -4,10 +4,10 @@ import com.blueline.databus.core.dao.SysDBDao;
 import com.blueline.databus.core.helper.MACHelper;
 import com.blueline.databus.core.datatype.RestResult;
 import com.blueline.databus.core.datatype.ResultType;
-import com.blueline.databus.core.configtype.AdminConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -31,9 +31,11 @@ public class AuthenticationFilterTest {
     @Autowired
     private SysDBDao sysDBDao;
 
-    @Autowired
+    @Value("${admin.appkey}")
+    private String adminAppKey;
 
-    private AdminConfig adminConfig;
+    @Value("${admin.skey}")
+    private String adminSKey;
 
     @Test
     public void has_no_x_appkey() {
@@ -61,11 +63,13 @@ public class AuthenticationFilterTest {
 
     @Test
     public void has_wrong_mac() {
-        String dummyApi = "http://localhost:8888/api/data/db1/table1?id=1";
+        String dummyApi = "http://localhost:8888/api/data/databus_core/table1?id=1";
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("x-appkey", adminConfig.getAppkey());
+        headers.add("x-appkey", adminAppKey); // can pass thru filter
         headers.add("x-mac", "WHATEVER");
+
+        System.out.println("==> test x-appkey=" + adminAppKey);
 
         ResponseEntity<RestResult> result = restTemplate.exchange(
                 dummyApi, HttpMethod.GET, new HttpEntity<>(headers), RestResult.class);
@@ -79,10 +83,10 @@ public class AuthenticationFilterTest {
         String dummyApi = "http://localhost:8888/api/data/db1/table1?id=1";
 
         // 如果appkey是XYZ123,其skey也是
-        String reqMac = MACHelper.calculateMAC(adminConfig.getSkey(), "XYZ123_GET_/api/data/db1/table1?id=1");
+        String reqMac = MACHelper.calculateMAC(adminSKey, "XYZ123_GET_/api/data/db1/table1?id=1");
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("x-appkey", adminConfig.getAppkey());
+        headers.add("x-appkey", adminAppKey);
         headers.add("x-mac", reqMac);
 
         ResponseEntity<RestResult> result = restTemplate.exchange(

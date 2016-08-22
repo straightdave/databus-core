@@ -24,12 +24,10 @@ public class AclCacheService {
     @Value("${admin.skey}")
     private String adminSKey;
 
-    private StringRedisTemplate stringRedisTemplate;
 
     @Autowired
-    public AclCacheService(StringRedisTemplate stringRedisTemplate) {
-        this.stringRedisTemplate = stringRedisTemplate;
-    }
+    private StringRedisTemplate redisTemplate4Acl;
+
 
     /**
      * 检测redis中得acl信息,判断某client(通过其appkey)能否访问api
@@ -45,7 +43,7 @@ public class AclCacheService {
             return 2; // this is admin, ignore checking
         }
 
-        String content = this.stringRedisTemplate.opsForValue().get(api);
+        String content = this.redisTemplate4Acl.opsForValue().get(api);
 
         if (StringUtils.isEmpty(content)) {
             return 0; // no access record in redis
@@ -76,11 +74,11 @@ public class AclCacheService {
         int count = 0;
 
         if (cleanUnknown) {
-            this.stringRedisTemplate.getConnectionFactory().getConnection().flushDb();
+            this.redisTemplate4Acl.getConnectionFactory().getConnection().flushDb();
         }
 
         for(AclInfo item : aclList) {
-            this.stringRedisTemplate.opsForValue().set(item.getApi(), item.toString());
+            this.redisTemplate4Acl.opsForValue().set(item.getApi(), item.toString());
             count++;
         }
         return count;
@@ -96,6 +94,14 @@ public class AclCacheService {
     }
 
     public void loadOneAcl(AclInfo aclInfo) {
-        this.stringRedisTemplate.opsForValue().set(aclInfo.getApi(), aclInfo.toString());
+        this.redisTemplate4Acl.opsForValue().set(aclInfo.getApi(), aclInfo.toString());
+    }
+
+    /**
+     * 清除本DB中所有数据
+     * 主要用作测试目的
+     */
+    public void flushDB() {
+        this.redisTemplate4Acl.getConnectionFactory().getConnection().flushDb();
     }
 }

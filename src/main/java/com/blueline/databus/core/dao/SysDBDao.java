@@ -1,17 +1,13 @@
 package com.blueline.databus.core.dao;
 
 import com.blueline.databus.core.datatype.AclInfo;
-import com.blueline.databus.core.datatype.Client;
 import com.blueline.databus.core.helper.RandomStringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.sql.*;
 import java.util.*;
 
@@ -29,7 +25,7 @@ public class SysDBDao {
      */
     public String getSKey(String appKey) {
         return this.templateSys.queryForObject(
-                "SELECT `skey` FROM `clients` WHERE `appkey` = ?",
+                "SELECT `skey` FROM `databus_sys`.`clients` WHERE `appkey` = ?",
                 String.class, appKey);
     }
 
