@@ -33,6 +33,7 @@ public class CoreDBDao {
      * @param dbName 数据库名
      * @param tableName 表名
      * @param jsonBody json参数
+     * @throws InternalException 内部异常
      */
     public void createTable(String dbName, String tableName, String jsonBody)
             throws InternalException {
@@ -41,6 +42,13 @@ public class CoreDBDao {
         this.templateCore.execute(sql);
     }
 
+    /**
+     * 创建表(如果表已存在不会抛出异常,主要用于测试目的)
+     * @param dbName 数据库名
+     * @param tableName 表名
+     * @param jsonBody json参数
+     * @throws InternalException 内部异常
+     */
     public void createTableIfNotExist(String dbName, String tableName, String jsonBody)
             throws InternalException {
         String sql = sqlParser.parseCreateTableSQL(dbName, tableName, jsonBody, true);
@@ -52,7 +60,7 @@ public class CoreDBDao {
      * 删除表
      * @param dbName 数据库名
      * @param tableName 表名
-     * @return int 受影响的行数
+     * @return 受影响的行数
      */
     public int dropTable(String dbName, String tableName) {
         String sql = sqlParser.parseDropTableSQL(dbName, tableName);
@@ -60,6 +68,12 @@ public class CoreDBDao {
         return this.templateCore.update(sql);
     }
 
+    /**
+     * 删除表(如果表不存在也不会抛出异常,主要用于测试目的)
+     * @param dbName 数据库名
+     * @param tableName 表名
+     * @return 受影响的行数
+     */
     public int dropTableIfExist(String dbName, String tableName) {
         String sql = sqlParser.parseDropTableSQL(dbName, tableName, true);
         logger.debug("dropTable:拼凑的SQL语句为: " + sql);
@@ -67,11 +81,14 @@ public class CoreDBDao {
     }
 
     /**
-     * 从总线中读取数据
+     * 从总线数据库的表中读取数据
+     * 目前只支持读取所有字段
      * @param dbName 数据库名
      * @param tableName 表名
      * @param parameterMap 请求的参数键值对列表
-     * @return 查询的数据转化成的JSON字符串
+     * @return 查询的数据结果转化成的JSON字符串
+     * @throws InternalException 内部异常
+     * @throws JsonProcessingException Json处理异常
      */
     public String queryData(String dbName, String tableName, Map<String, String[]> parameterMap)
             throws InternalException, JsonProcessingException {
@@ -109,6 +126,7 @@ public class CoreDBDao {
      * @param tableName 数据表名
      * @param colName 列名
      * @param colValue 列的值(作为条件)
+     * @param jsonBody json参数
      * @return 影响的行数
      * @throws InternalException 内部异常信息
      */
@@ -142,7 +160,7 @@ public class CoreDBDao {
      * dao内部使用,不抛出异常
      * @param dbName 数据库名
      * @param tableName 表名
-     * @return 列信息对象的列表 List<ColumnInfo>
+     * @return 列信息对象的列表
      */
     private List<ColumnInfo> getColumns(String dbName, String tableName)
             throws InternalException {

@@ -1,16 +1,12 @@
 package com.blueline.databus.core.filter;
 
-import com.blueline.databus.core.datatype.RestResult;
-import com.blueline.databus.core.helper.FilterResponseRender;
-
 import javax.servlet.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static com.blueline.databus.core.datatype.ResultType.ERROR;
-
 /**
- * 添加CORS头部
+ * filter定义:添加CORS支持
+ * Spring官方doc等处记录的方法在Springboot中都不生效,暂时以filter形式实现
  */
 public class CorsFilter implements Filter {
 

@@ -187,14 +187,15 @@ public class SQLParser {
      * 忽略id列和列信息中没有的列;
      * @param jsonBody ServletRequest的getInputStream()的结果
      *                 造型大概是:
-     *                 [
+     *           <code>[
      *                     {"name":"dave", "age":"18", "sex":"male"},
      *                     {"name":"mike", "age":"18", "sex":"male", "salary":"20k"},
      *                     ...
-     *                 ]
+     *                 ]</code>
      *
      * @param columnInfoList 列信息
      * @return sql整句 INSERT INTO `%s`.`%s` (... ) VALUES (...), (...), ...
+     * @throws InternalException 内部异常
      */
     public String parseSQL4Insert(String jsonBody, final List<ColumnInfo> columnInfoList)
             throws InternalException {
@@ -273,10 +274,10 @@ public class SQLParser {
 
     /**
      * update符合条件的表的数据。条件就是后两个路径参数colName和colValue
-     * 这两个参数组成UPDATE语句中的 "WHERE `colName` = 'colValue'" 条件句
+     * 这两个参数组成UPDATE语句中的 <code>"WHERE `colName` = 'colValue'"</code> 条件句
      * 修改信息是在body中的json字符串,形式大概像insert所需类似:
      *
-     *                  [{"name":"dave", "age":"18", "sex":"male"}]
+     * <code>[{"name":"dave", "age":"18", "sex":"male"}] </code>
      *
      * 只不过,只有第一个json元素值会拿来使用
      * 它组成UPDATE语句中的 "SET `xxx` = 'yyy' " 部分
@@ -286,6 +287,7 @@ public class SQLParser {
      * @param colValue 列值(作为修改条件)
      * @param jsonBody 请求提内的修改信息的json
      * @return SQL命令
+     * @throws InternalException 内部异常
      */
     public String parseSQL4Update(String colName, String colValue, String jsonBody)
             throws InternalException {

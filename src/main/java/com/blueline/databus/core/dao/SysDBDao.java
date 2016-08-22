@@ -50,6 +50,11 @@ public class SysDBDao {
         );
     }
 
+    /**
+     * 根据api路径获取acl信息对象
+     * @param api api路径
+     * @return acl信息
+     */
     public AclInfo getAclInfoByApi(String api) {
         return this.templateSys.queryForObject(
             "SELECT `api`, `method`, `appkey`, `duration` FROM `databus_sys`.`acl` WHERE `api` = ?",
@@ -98,10 +103,10 @@ public class SysDBDao {
 
     /**
      * 建表成功之后,需要为表自动生成interfaces(API),且为owner加上这些权限
-     * @param dbName
-     * @param tableName
-     * @param appKey
-     * @return
+     * @param dbName 数据库名
+     * @param tableName 表名
+     * @param appKey 访问者appkey
+     * @return 受影响行数
      */
     public int doAfterTableCreated(String dbName, String tableName, String appKey) {
 
@@ -116,6 +121,11 @@ public class SysDBDao {
         return 1;
     }
 
+    /**
+     * 重置用户的appkey和skey
+     * @param clientId 用户id
+     * @return 受影响行数
+     */
     public int refreshKeys(int clientId) {
         String newAppKey = RandomStringHelper.getRandomString(10);
         String newSKey = RandomStringHelper.hashKey(newAppKey);
@@ -125,6 +135,11 @@ public class SysDBDao {
         return this.templateSys.update(sql);
     }
 
+    /**
+     * 重置用户的appkey和skey
+     * @param name 用户名
+     * @return 受影响行数
+     */
     public int refreshKeys(String name) {
         String newAppKey = RandomStringHelper.getRandomString(10);
         String newSKey = RandomStringHelper.hashKey(newAppKey);
@@ -133,5 +148,4 @@ public class SysDBDao {
                 newAppKey, newSKey, name);
         return this.templateSys.update(sql);
     }
-
 }

@@ -1,16 +1,18 @@
 package com.blueline.databus.core.datasource;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.beans.PropertyVetoException;
 
+/**
+ * 使用JDBC(c3p0连接池)
+ * 配置用于核心数据库(用户自由使用空间)的数据源
+ */
 @Configuration
 public class CoreDataSourceConfig {
 

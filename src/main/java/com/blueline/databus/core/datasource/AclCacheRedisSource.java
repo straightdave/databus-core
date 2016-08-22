@@ -7,6 +7,10 @@ import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import redis.clients.jedis.JedisPoolConfig;
 
+/**
+ * 使用Jedis资源池
+ * 配置用于ACL缓存功能的redis数据服务
+ */
 @Configuration
 public class AclCacheRedisSource {
 

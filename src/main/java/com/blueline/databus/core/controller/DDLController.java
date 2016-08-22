@@ -30,8 +30,8 @@ public class DDLController{
     @Autowired
     private CoreDBDao coreDBDao;
 
-//    @Autowired
-//    private SysDBDao sysDBDao;
+    @Autowired
+    private SysDBDao sysDBDao;
 
     @RequestMapping(value = "/{dbName}/{tableName}", method = POST)
     public RestResult createTable(
@@ -40,6 +40,7 @@ public class DDLController{
     ) {
 
         try {
+            // read request body
             BufferedReader r = request.getReader();
             String body = r.lines().collect(Collectors.joining(System.lineSeparator()));
 
@@ -51,7 +52,7 @@ public class DDLController{
 
             coreDBDao.createTable(dbName, tableName, body);
         }
-        catch (InternalException | IOException | DataAccessException ex) {
+        catch (Exception ex) {
             logger.error(ex.getMessage());
             return new RestResult(ResultType.ERROR, ex.getMessage());
         }

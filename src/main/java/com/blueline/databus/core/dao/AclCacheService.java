@@ -15,6 +15,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * ACL缓存操作服务
+ */
 @Repository
 public class AclCacheService {
 
@@ -24,17 +27,23 @@ public class AclCacheService {
     @Value("${admin.skey}")
     private String adminSKey;
 
-
     @Autowired
     private StringRedisTemplate redisTemplate4Acl;
 
-
     /**
-     * 检测redis中得acl信息,判断某client(通过其appkey)能否访问api
-     * @param api api地址(键值)
-     * @param method 访问方法(HTTP)
+     * 检测redis缓存中的acl信息,判断某个client(通过其appkey)能否访问api
+     * @param api api地址(是缓存键值)
+     * @param method 访问方法(HTTP方法,如GET,POST等)
      * @param appkey client的appkey
-     * @return status
+     * @return 结果状态
+     * <ul>
+     *     <li>0 - 缓存中没有该api对应值</li>
+     *     <li>1 - 缓存中有记录,而且可以访问</li>
+     *     <li>2 - 表示输入的appkey表明访问者是管理员,可以访问</li>
+     *     <li><strong>-1</strong> - 缓存中有记录,但是记录显示无权限访问</li>
+     * </ul>
+     * @throws InternalException 内部异常(调用TimeHelper判断可否访问时可能抛出), @see #TimeHelper
+     * @throws IOException IO异常(解析缓存中值,即json格式数据时,可能抛出)
      */
     public int checkAccess(String api, String method, String appkey)
             throws InternalException, IOException {
@@ -65,10 +74,10 @@ public class AclCacheService {
     }
 
     /**
-     * 将acl信息列表加载到redis中,会覆盖已有值
-     * @param aclList acl列表
-     * @param cleanUnknown 是否清除acl数据库中不在参数列表中的其他数据
-     * @return <int>设置的数目</int>
+     * 将acl信息列表加载到缓存中
+     * @param aclList acl信息列表
+     * @param cleanUnknown 是否清除缓存中,不在参数acl信息列表中的其它缓存acl信息
+     * @return 设置的数目
      */
     public int loadAcl(List<AclInfo> aclList, boolean cleanUnknown) {
         int count = 0;
@@ -85,21 +94,25 @@ public class AclCacheService {
     }
 
     /**
-     * loadAcl(list, boolean)的重载,默认保留设置范围外的值
-     * @param aclList 要设置的acl数据列表
-     * @return <int>设置的数目</int>
+     * loadAcl(list, boolean)的重载,默认不清除设置范围外的值
+     * @param aclList 要设置的acl信息列表
+     * @return 设置的数目
      */
     public int loadAcl(List<AclInfo> aclList) {
         return loadAcl(aclList, false);
     }
 
+    /**
+     * 载入一条acl信息,不干扰缓存中其它数据
+     * @param aclInfo acl信息
+     */
     public void loadOneAcl(AclInfo aclInfo) {
         this.redisTemplate4Acl.opsForValue().set(aclInfo.getApi(), aclInfo.toString());
     }
 
     /**
-     * 清除本DB中所有数据
-     * 主要用作测试目的
+     * 清除本缓存中的所有数据
+     * 主要用于测试目的
      */
     public void flushDB() {
         this.redisTemplate4Acl.getConnectionFactory().getConnection().flushDb();

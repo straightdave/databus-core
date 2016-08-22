@@ -11,6 +11,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import javax.sql.DataSource;
 import java.beans.PropertyVetoException;
 
+/**
+ * 使用JDBC(c3p0连接池)
+ * 配置用于系统数据库(数据总线的系统数据定义)的数据源
+ */
 @Configuration
 public class SysDataSourceConfig {
 
@@ -25,7 +29,6 @@ public class SysDataSourceConfig {
 
     @Value("${db.sys.password}")
     private String sysPassword;
-
 
     @Bean
     public DataSource dsSys() throws PropertyVetoException {
