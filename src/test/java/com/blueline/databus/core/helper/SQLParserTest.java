@@ -1,6 +1,7 @@
 package com.blueline.databus.core.helper;
 
 import com.blueline.databus.core.datatype.ColumnInfo;
+import com.blueline.databus.core.exception.InternalException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +91,7 @@ public class SQLParserTest {
     }
 
     @Test
-    public void insert_parse_right() throws IOException {
+    public void insert_parse_right() throws InternalException {
         String jsonBody = "[{\"name\" : \"dave\", \"age\" : \"18\"}, {\"name\": \"frank\", \"age\" : \"11\"}]";
 
         List<ColumnInfo> columnInfoList = new LinkedList<>();
@@ -106,7 +107,7 @@ public class SQLParserTest {
     }
 
     @Test
-    public void insert_parse_bad() throws IOException {
+    public void insert_parse_bad() throws InternalException {
         String jsonBody = "[{\"name\" : \"dirk\", \"age\" : 18}, {}]";
 
         List<ColumnInfo> columnInfoList = new LinkedList<>();
@@ -123,20 +124,19 @@ public class SQLParserTest {
     }
 
     @Test
-    public void update_parse_multi_value() throws IOException {
-        Map<String, String[]> map = new HashMap<>();
-        map.put("name", new String[] { "1", "2" });
-        map.put("sex", new String[] {"female"});  // 先入后出顺序
+    public void update_parse_multi_value() throws InternalException {
 
-        String result = sqlParser.parseSQL4Update(map, "id", "10");
+        String jsonBody = "[{\"name\":\"dave is 6666\"}]";
+
+        String result = sqlParser.parseSQL4Update("id", "10", jsonBody);
         assertFalse("SQL should not be blank", StringUtils.isEmpty(result));
 
         System.out.println(result);
-        assertEquals("UPDATE `%s`.`%s` SET `sex`='female',`name`='1' WHERE `id`='10'", result);
+        assertEquals("UPDATE `%s`.`%s` SET `name`='dave is 6666' WHERE `id`='10'", result);
     }
 
     @Test
-    public void createTable_parse() throws IOException {
+    public void createTable_parse() throws InternalException {
 
         String jsonBody = "[{\"name\":\"col1\",\"type\":\"int unsigned\",\"nullable\":\"true\"}]";
 
@@ -146,7 +146,7 @@ public class SQLParserTest {
     }
 
     @Test
-    public void createTable_parse_more_complex() throws IOException {
+    public void createTable_parse_more_complex() throws InternalException {
 
         String jsonBody = "[{\"name\":\"id\",\"type\":\"int unsigned\",\"nullable\":\"true\"}," +
                 "{\"name\":\"id\",\"type\":\"int unsigned\",\"nullable\":\"true\"}," +

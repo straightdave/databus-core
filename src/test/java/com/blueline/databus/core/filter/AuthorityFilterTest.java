@@ -1,6 +1,8 @@
 package com.blueline.databus.core.filter;
 
+import com.blueline.databus.core.dao.CoreDBDao;
 import com.blueline.databus.core.datatype.ResultType;
+import com.blueline.databus.core.exception.InternalException;
 import com.blueline.databus.core.helper.MACHelper;
 import com.blueline.databus.core.datatype.RestResult;
 import com.blueline.databus.core.configtype.AdminConfig;
@@ -25,13 +27,17 @@ public class AuthorityFilterTest {
     private TestRestTemplate restTemplate = new TestRestTemplate();
 
     @Autowired
-    private AdminConfig adminConfig;
+    private CoreDBDao coreDBDao;
 
     @Test
-    public void non_admin_has_no_access() {
-        String dummyApi = "http://localhost:8888/api/data/db1/table1?id=1";
+    public void non_admin_has_no_access() throws InternalException {
+        String jsonBody = "[{\"name\":\"name\",\"type\":\"varchar(255)\"}]";
+        coreDBDao.createTableIfNotExist("databus_core", "table1", jsonBody);
+        System.out.println("===> test table created");
 
-        String reqMac = MACHelper.calculateMAC("skey1", "/api/data/db1/table1?id=1");
+        String dummyApi = "http://localhost:8888/api/data/databus_core/table1?id=1";
+
+        String reqMac = MACHelper.calculateMAC("skey1", "appkey1_GET_/api/data/databus_core/table1?id=1");
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("x-appkey", "appkey1");
@@ -40,7 +46,12 @@ public class AuthorityFilterTest {
         ResponseEntity<RestResult> result = restTemplate.exchange(
                 dummyApi, HttpMethod.GET, new HttpEntity<>(headers), RestResult.class);
 
-        assertEquals(ResultType.FAIL, result.getBody().getResultType());
+        System.out.println(result.getBody());
+
+        assertNotEquals(ResultType.OK, result.getBody().getResultType());
         assertEquals("No Access", result.getBody().getMessage());
+
+        coreDBDao.dropTableIfExist("databus_core", "table1");
+        System.out.println("===> test table dropped");
     }
 }

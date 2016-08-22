@@ -42,12 +42,6 @@ public class AuthenticationFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest)req;
         HttpServletResponse response = (HttpServletResponse)resp;
 
-        if (!request.getReader().ready()) {
-            RestResult result = new RestResult(ResultType.FAIL, "request stream is not ready");
-            FilterResponseRender.render(response, result);
-            return;
-        }
-
         // 记录API调用,不加 Query String
         // 这个指令,如果redis没有ready,仅忽略
         redisHelper.recordAPICall(request.getRequestURI());

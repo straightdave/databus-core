@@ -33,12 +33,11 @@ public class DMLController {
     @RequestMapping(value = "/{dbName}/{realTableName}", method = GET)
     public RestResult queryData(
         @PathVariable("dbName") String dbName,
-        @PathVariable("realTableName") String realTableName
+        @PathVariable("realTableName") String tableName
     ) {
         try {
-            String jsonData = coreDBDao.queryData(dbName, realTableName, request.getParameterMap());
+            String jsonData = coreDBDao.queryData(dbName, tableName, request.getParameterMap());
 
-            // 设置缓存相关参数
             response.setHeader("Cache-Control", "public");
             response.setHeader("Cache-Control", "must-revalidate");
             response.setHeader("Cache-Control", "max-age=3600");
@@ -79,8 +78,9 @@ public class DMLController {
         try {
             int count = coreDBDao.insertData(dbName, realTableName, jsonBody);
             if (count > 0) {
-                return new RestResult(ResultType.OK, String.format("%s rows inserted by %s", count));
-            } else {
+                return new RestResult(ResultType.OK, String.format("%s rows inserted", count));
+            }
+            else {
                 return new RestResult(ResultType.FAIL, "nothing inserted");
             }
         }
@@ -90,21 +90,24 @@ public class DMLController {
         }
     }
 
-    @RequestMapping(value = "/{dbName}/{realTableName}/{colName}/{colValue}", method = PUT)
+    @RequestMapping(value = "/{dbName}/{tableName}/{colName}/{colValue}", method = PUT)
     public RestResult updateData(
         @PathVariable("dbName") String dbName,
-        @PathVariable("realTableName") String realTableName,
+        @PathVariable("tableName") String tableName,
         @PathVariable("colName") String colName,
-        @PathVariable("colValue") String colValue
+        @PathVariable("colValue") String colValue,
+        @RequestBody String jsonBody
     ) {
         try {
-            int count = coreDBDao.updateData(dbName,realTableName, colName, colValue, request.getParameterMap());
+            int count = coreDBDao.updateData(dbName, tableName, colName, colValue, jsonBody);
             if (count > 0) {
-                return new RestResult(ResultType.OK, String.format("%s rows updated by %s", count));
-            } else {
+                return new RestResult(ResultType.OK, String.format("%s rows updated", count));
+            }
+            else {
                 return new RestResult(ResultType.FAIL,"nothing updated");
             }
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             logger.info(ex.getMessage());
             return new RestResult(ResultType.ERROR, ex.getMessage());
         }

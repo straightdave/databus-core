@@ -27,3 +27,8 @@ server:
 default:
     defaultTakes: 10
     maxPOSTLength: 4096
+
+endpoints:
+    cors:
+        allowed-origins: http://example.com
+        allowed-methods: GET,POST

@@ -7,12 +7,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
-import javax.sql.DataSource;
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -20,14 +21,12 @@ import java.util.*;
 @Repository
 public class CoreDBDao {
     private static final Logger logger = Logger.getLogger(CoreDBDao.class);
-    private JdbcTemplate jdbcTemplate;
-    private SQLParser sqlParser;
 
     @Autowired
-    public void init(DataSource dataSource, SQLParser sqlParser) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.sqlParser = sqlParser;
-    }
+    private JdbcTemplate templateCore;
+
+    @Autowired
+    private SQLParser sqlParser;
 
     /**
      * 创建表
@@ -35,10 +34,18 @@ public class CoreDBDao {
      * @param tableName 表名
      * @param jsonBody json参数
      */
-    public void createTable(String dbName, String tableName, String jsonBody) {
+    public void createTable(String dbName, String tableName, String jsonBody)
+            throws InternalException {
         String sql = sqlParser.parseCreateTableSQL(dbName, tableName, jsonBody);
         logger.debug("createTable:拼凑的SQL语句为: " + sql);
-        this.jdbcTemplate.execute(sql);
+        this.templateCore.execute(sql);
+    }
+
+    public void createTableIfNotExist(String dbName, String tableName, String jsonBody)
+            throws InternalException {
+        String sql = sqlParser.parseCreateTableSQL(dbName, tableName, jsonBody, true);
+        logger.debug("createTable:拼凑的SQL语句为: " + sql);
+        this.templateCore.execute(sql);
     }
 
     /**
@@ -50,7 +57,13 @@ public class CoreDBDao {
     public int dropTable(String dbName, String tableName) {
         String sql = sqlParser.parseDropTableSQL(dbName, tableName);
         logger.debug("dropTable:拼凑的SQL语句为: " + sql);
-        return this.jdbcTemplate.update(sql);
+        return this.templateCore.update(sql);
+    }
+
+    public int dropTableIfExist(String dbName, String tableName) {
+        String sql = sqlParser.parseDropTableSQL(dbName, tableName, true);
+        logger.debug("dropTable:拼凑的SQL语句为: " + sql);
+        return this.templateCore.update(sql);
     }
 
     /**
@@ -63,42 +76,14 @@ public class CoreDBDao {
     public String queryData(String dbName, String tableName, Map<String, String[]> parameterMap)
             throws InternalException, JsonProcessingException {
 
-        final List<ColumnInfo> columnsInfo = getColumns(dbName, tableName);
-
-        ObjectMapper om = new ObjectMapper();
-        List<Map<String, String>> dataResult = new ArrayList<>();
-
         // 拼凑完整的SQL语句;目前SELECT只支持获取所有字段
         String clauses = sqlParser.parseSQL4Select(parameterMap);
         String sql = String.format("SELECT * FROM `%s`.`%s` %s", dbName, tableName, clauses);
         logger.debug("queryData:拼凑的SQL语句为: " + sql);
 
-        SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
-        while (rs.next()) {
-            Map<String, String> lineResult = new HashMap<>();
-            for (ColumnInfo col : columnsInfo) {
-                // 目前支持获取5类数据类型进行填充
-                if (col.getDataType().contains("int")) {
-                    lineResult.put(col.getName(), String.valueOf(rs.getInt(col.getPosition())));
-                }
-                else if (col.getDataType().equalsIgnoreCase("double")) {
-                    lineResult.put(col.getName(), String.valueOf(rs.getDouble(col.getPosition())));
-                }
-                else if (col.getDataType().equalsIgnoreCase("float")) {
-                    lineResult.put(col.getName(), String.valueOf(rs.getFloat(col.getPosition())));
-                }
-                else if (col.getDataType().equalsIgnoreCase("varchar") ||
-                        col.getDataType().equalsIgnoreCase("text")) {
-                    lineResult.put(col.getName(), rs.getString(col.getPosition()));
-                }
-                else if (col.getDataType().equalsIgnoreCase("date") ||
-                        col.getDataType().equalsIgnoreCase("datetime")) {
-                    lineResult.put(col.getName(), String.valueOf(rs.getDate(col.getPosition())));
-                }
-                dataResult.add(lineResult);
-            }
-        }
-        return om.writeValueAsString(dataResult);
+        List<Map<String, Object>> result = this.templateCore.queryForList(sql);
+        ObjectMapper om = new ObjectMapper();
+        return om.writeValueAsString(result);
     }
 
     /**
@@ -115,7 +100,7 @@ public class CoreDBDao {
         String sql_format = sqlParser.parseSQL4Insert(jsonBody, columnsInfo);
         String sql = String.format(sql_format, dbName, tableName);
         logger.debug("insertData:拼凑的SQL语句为: " + sql);
-        return this.jdbcTemplate.update(sql);
+        return this.templateCore.update(sql);
     }
 
     /**
@@ -124,16 +109,16 @@ public class CoreDBDao {
      * @param tableName 数据表名
      * @param colName 列名
      * @param colValue 列的值(作为条件)
-     * @param paramMap 请求body中的参数键值对
      * @return 影响的行数
      * @throws InternalException 内部异常信息
      */
-    public int updateData(String dbName, String tableName, String colName, String colValue, Map<String, String[]> paramMap)
+    public int updateData(String dbName, String tableName, String colName, String colValue, String jsonBody)
             throws InternalException {
-        String sql_format = sqlParser.parseSQL4Update(paramMap, colName, colValue);
+        String sql_format = sqlParser.parseSQL4Update(colName, colValue, jsonBody);
         String sql = String.format(sql_format, dbName, tableName);
+        System.out.println(sql);
         logger.debug("updateData:拼凑的SQL语句为: " + sql);
-        return this.jdbcTemplate.update(sql);
+        return this.templateCore.update(sql);
     }
 
     /**
@@ -149,7 +134,7 @@ public class CoreDBDao {
         String clauses = sqlParser.parseSQL4Delete(parameterMap);
         String sql = String.format("DELETE FROM `%s`.`%s` %s", dbName, tableName, clauses);
         logger.debug("deleteData:拼凑的SQL语句为: " + sql);
-        return this.jdbcTemplate.update(sql);
+        return this.templateCore.update(sql);
     }
 
     /**
@@ -167,7 +152,7 @@ public class CoreDBDao {
                 "FROM information_schema.COLUMNS " +
                 "WHERE table_name = ? AND table_schema = ?";
 
-        List<ColumnInfo> result = this.jdbcTemplate.query(
+        List<ColumnInfo> result = this.templateCore.query(
             sql,
             new Object[]{ tableName, dbName },
             new RowMapper<ColumnInfo>() {

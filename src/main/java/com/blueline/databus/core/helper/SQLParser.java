@@ -1,17 +1,12 @@
 package com.blueline.databus.core.helper;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.blueline.databus.core.datatype.ColumnInfo;
-import com.blueline.databus.core.configtype.DefaultConfig;
+import com.blueline.databus.core.exception.InternalException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -21,86 +16,90 @@ import org.springframework.util.StringUtils;
  */
 @Component
 public class SQLParser {
-    private DefaultConfig defaultConfig;
 
-    public SQLParser(DefaultConfig defaultConfig) {
-        this.defaultConfig = defaultConfig;
-    }
+    @Value("${default.defaultTakes}")
+    private String defaultTakes;
 
     /**
      * 分析Query String,将其转化为Select-SQL语句的条件clause
      * @param paramMap request获取的parameter Map
      * @return SQL查询clause
      */
-    public String parseSQL4Select(Map<String, String[]> paramMap) {
-	    // 预处理map,确保包含meta参数
-        if (!paramMap.containsKey("_by")) {
-            // 默认排序字段是id,这要求库中表都应该含有id字段
-            paramMap.put("_by", new String[] { "id" });
+    public String parseSQL4Select(final Map<String, String[]> paramMap) {
+
+        // copy param map
+        Map<String, String[]> p2 = new HashMap<>();
+        paramMap.forEach((k, v) -> p2.put(k, v));
+
+        // 预处理map,确保包含必须的meta参数
+        if (!p2.containsKey("_by")) {
+            // 默认排序字段是id,这要求表应该含有字段id
+            p2.put("_by", new String[] {"id"});
         }
-        if (!paramMap.containsKey("_order")) {
-            paramMap.put("_order", new String[] { "asc" });
+        if (!p2.containsKey("_order")) {
+            // 默认升序
+            p2.put("_order", new String[] {"asc"});
         }
-        if (!paramMap.containsKey("_skip")) {
-            paramMap.put("_skip", new String[] { "0" });
+        if (!p2.containsKey("_skip")) {
+            p2.put("_skip", new String[] {"0"});
         }
-        if (!paramMap.containsKey("_take")) {
-            paramMap.put("_take", new String[] {
-                defaultConfig.getDefaultTakes()
+        if (!p2.containsKey("_take")) {
+            p2.put("_take", new String[] {
+                StringUtils.isEmpty(defaultTakes) ? "10" : defaultTakes
             });
         }
 
         StringBuilder sqlQuery = new StringBuilder("WHERE ");
 
         // 先拼接非meta参数
-        paramMap.entrySet()
-                .stream()
-                .filter(entry -> !entry.getKey().startsWith("_"))
-                .forEach(entry -> {
-                    String k = entry.getKey();
-                    String[] v = entry.getValue();
+        p2.entrySet()
+            .stream()
+            .filter(entry -> !entry.getKey().startsWith("_"))
+            .forEach(entry -> {
+                String k = entry.getKey();
+                String[] v = entry.getValue();
 
-                    // 对所有 *_start或*_stop 参数,如若同名多值,只支持其第一个值,即取v[0]
-                    if (k.endsWith("_start")) {
-                        String columnName = k.substring(0, k.length() - "_start".length());
-                        sqlQuery.append(String.format("`%s`>='%s' AND ", columnName, v[0]));
-                    }
-                    else if (k.endsWith("_stop")) {
-                        String columnName = k.substring(0, k.length() - "_stop".length());
-                        sqlQuery.append(String.format("`%s`<='%s' AND ", columnName, v[0]));
-                    }
+                // 对所有 *_start或*_stop 参数,如若同名多值,只支持其第一个值,即取v[0]
+                if (k.endsWith("_start")) {
+                    String columnName = k.substring(0, k.length() - "_start".length());
+                    sqlQuery.append(String.format("`%s`>='%s' AND ", columnName, v[0]));
+                }
+                else if (k.endsWith("_stop")) {
+                    String columnName = k.substring(0, k.length() - "_stop".length());
+                    sqlQuery.append(String.format("`%s`<='%s' AND ", columnName, v[0]));
+                }
 
-                    // 对于 *_not;多值可重复拼接
-                    else if (k.endsWith("_not")) {
-                        String columnName = k.substring(0, k.length() - "_not".length());
-                        if (v.length > 1) {
-                            sqlQuery.append("(");
-                            for (String value : v) {
-                                sqlQuery.append(String.format("`%s`<>'%s' AND ", columnName, value));
-                            }
-                            // 用1=1消除遗留的AND
-                            sqlQuery.append("1=1) AND ");
+                // 对于 *_not;多值可重复拼接
+                else if (k.endsWith("_not")) {
+                    String columnName = k.substring(0, k.length() - "_not".length());
+                    if (v.length > 1) {
+                        sqlQuery.append("(");
+                        for (String value : v) {
+                            sqlQuery.append(String.format("`%s`<>'%s' AND ", columnName, value));
                         }
-                        else if (v.length == 1) {
-                            sqlQuery.append(String.format("`%s`='%s' AND ", columnName, v[0]));
-                        }
+                        // 用1=1消除遗留的AND
+                        sqlQuery.append("1=1) AND ");
                     }
+                    else if (v.length == 1) {
+                        sqlQuery.append(String.format("`%s`='%s' AND ", columnName, v[0]));
+                    }
+                }
 
-                    // 对于其他普通参数值对;如遇同名多值则重复用OR拼接
-                    else {
-                        if (v.length > 1) {
-                            sqlQuery.append("(");
-                            for (String value : v) {
-                                sqlQuery.append(String.format("`%s`='%s' OR ", k, value));
-                            }
-                            // 用1=0消除遗留的OR
-                            sqlQuery.append("1=0) AND ");
+                // 对于其他普通参数值对;如遇同名多值则重复用OR拼接
+                else {
+                    if (v.length > 1) {
+                        sqlQuery.append("(");
+                        for (String value : v) {
+                            sqlQuery.append(String.format("`%s`='%s' OR ", k, value));
                         }
-                        else if (v.length == 1) {
-                            sqlQuery.append(String.format("`%s`='%s' AND ", k, v[0]));
-                        }
+                        // 用1=0消除遗留的OR
+                        sqlQuery.append("1=0) AND ");
                     }
-                });
+                    else if (v.length == 1) {
+                        sqlQuery.append(String.format("`%s`='%s' AND ", k, v[0]));
+                    }
+                }
+            });
 
         // 在条件clause最后加上1=1,有助于去掉上面拼接时遗留的尾部的AND的功能
         // 并且,在没有条件clause的时候,1=1也可以去掉WHERE的功能
@@ -108,9 +107,9 @@ public class SQLParser {
 
         // 最后拼接meta参数
         sqlQuery.append(String.format("ORDER BY `%s` %s ",
-                paramMap.get("_by")[0], paramMap.get("_order")[0].toUpperCase()));
+                p2.get("_by")[0], p2.get("_order")[0].toUpperCase()));
         sqlQuery.append(String.format("LIMIT %s,%s",
-                paramMap.get("_skip")[0], paramMap.get("_take")[0]));
+                p2.get("_skip")[0], p2.get("_take")[0]));
 
         return sqlQuery.toString();
 	}
@@ -120,7 +119,7 @@ public class SQLParser {
      * @param paramMap 从request调用getParamsterMap获取的map
      * @return sql clauses
      */
-    public String parseSQL4Delete(Map<String, String[]> paramMap) {
+    public String parseSQL4Delete(final Map<String, String[]> paramMap) {
 
         StringBuilder sqlQuery = new StringBuilder("WHERE ");
 
@@ -197,7 +196,8 @@ public class SQLParser {
      * @param columnInfoList 列信息
      * @return sql整句 INSERT INTO `%s`.`%s` (... ) VALUES (...), (...), ...
      */
-    public String parseSQL4Insert(String jsonBody, final List<ColumnInfo> columnInfoList) {
+    public String parseSQL4Insert(String jsonBody, final List<ColumnInfo> columnInfoList)
+            throws InternalException {
 
         // 转换HTTP body传来的JSON数组,结构出错则报IOException
         ObjectMapper om = new ObjectMapper();
@@ -207,6 +207,7 @@ public class SQLParser {
         }
         catch (IOException ex) {
             System.err.println("fuck cannot wrap request data into json!");
+            throw new InternalException("cannot wrap request body into json");
         }
 
         // 从JSON中收集数据,等待解析成sql的list of maps
@@ -271,18 +272,45 @@ public class SQLParser {
     }
 
     /**
-     * 解析数据更新操作的简单的实现,目前可以实现的更新比较有限
-     * @param paramMap
-     * @param colName
-     * @param colValue
-     * @return
+     * update符合条件的表的数据。条件就是后两个路径参数colName和colValue
+     * 这两个参数组成UPDATE语句中的 "WHERE `colName` = 'colValue'" 条件句
+     * 修改信息是在body中的json字符串,形式大概像insert所需类似:
+     *
+     *                  [{"name":"dave", "age":"18", "sex":"male"}]
+     *
+     * 只不过,只有第一个json元素值会拿来使用
+     * 它组成UPDATE语句中的 "SET `xxx` = 'yyy' " 部分
+     * 记住,目前不过滤不存在的字段。如果条件和修改信息中有不存在的字段,都会导致最终的错误返回。
+     *
+     * @param colName 列名
+     * @param colValue 列值(作为修改条件)
+     * @param jsonBody 请求提内的修改信息的json
+     * @return SQL命令
      */
-    public String parseSQL4Update(Map<String, String[]> paramMap, String colName, String colValue) {
-        StringBuilder sb = new StringBuilder("UPDATE `%s`.`%s` SET ");
-        paramMap.forEach((k, v) -> sb.append(String.format("`%s`='%s',", k, v[0])));
-        removeLastComma(sb);
-        sb.append(String.format(" WHERE `%s`='%s'", colName, colValue));
-        return sb.toString();
+    public String parseSQL4Update(String colName, String colValue, String jsonBody)
+            throws InternalException {
+
+        // 转换HTTP body传来的JSON数组,结构出错则报IOException
+        ObjectMapper om = new ObjectMapper();
+        List<Map<String, Object>> inputData;
+        try {
+            inputData = om.readValue(jsonBody, LinkedList.class);
+        }
+        catch (IOException ex) {
+            System.err.println("fuck cannot wrap request data into json!");
+            throw new InternalException("failed to parse json input");
+        }
+
+        if (inputData.size() > 0) {
+            StringBuilder sb = new StringBuilder("UPDATE `%s`.`%s` SET ");
+            inputData.get(0).forEach((k, v) -> sb.append(String.format("`%s`='%s',", k, v)));
+            removeLastComma(sb);
+            sb.append(String.format(" WHERE `%s`='%s'", colName, colValue));
+            return sb.toString();
+        }
+        else {
+            throw new InternalException("no update clause found in json body");
+        }
     }
 
     private void removeLastComma(StringBuilder sb) {
@@ -294,30 +322,24 @@ public class SQLParser {
         sb.replace(index_of_last_comma, index_of_last_comma + 1, replacement);
     }
 
-    public String parseCreateTableSQL(String dbName, String tableName, String jsonBody) {
-
-        if (StringUtils.isEmpty(jsonBody)) {
-            System.err.println("fuck I got no json body!");
-        }
-
-        System.out.println(jsonBody);
-
-        List<ColumnInfo> columnInfoList = new LinkedList<>();
+    public String parseCreateTableSQL(String dbName, String tableName, String jsonBody, boolean ifNotExist)
+            throws InternalException {
 
         // 转换HTTP body传来的JSON数组,结构出错则报IOException
         ObjectMapper om = new ObjectMapper();
-        List<Map<String, String>> rawBody = null;
-
+        List<Map<String, String>> rawBody;
         try {
             rawBody = om.readValue(jsonBody, List.class);
         }
-        catch (IOException ex) {
+        catch (IOException | ClassCastException ex) {
             System.err.println("fuck cannot wrap request data into json!");
+            throw new InternalException("parse createTable SQL: " + ex.getMessage());
         }
 
+        List<ColumnInfo> columnInfoList = new LinkedList<>();
         rawBody.forEach(map -> {
             if (map.containsKey("name") && map.containsKey("type")) {
-                String colName = map.get("name");
+                String colName = map.get("name").toLowerCase();
                 String colType = map.get("type").toUpperCase();
 
                 boolean isNullable = true;
@@ -331,7 +353,14 @@ public class SQLParser {
 
 
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("CREATE TABLE `%s`.`%s` (`id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,", dbName, tableName));
+
+        if (ifNotExist) {
+            sb.append("CREATE TABLE IF NOT EXISTS ");
+        }
+        else {
+            sb.append("CREATE TABLE ");
+        }
+        sb.append(String.format("`%s`.`%s` (`id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,", dbName, tableName));
 
         columnInfoList.stream()
                 .filter(col -> !col.getName().equalsIgnoreCase("id")) // ignore user-provided id column
@@ -343,8 +372,21 @@ public class SQLParser {
         return sb.toString();
     }
 
+    public String parseCreateTableSQL(String dbName, String tableName, String jsonBody)
+            throws InternalException {
+        return parseCreateTableSQL(dbName, tableName, jsonBody, false);
+    }
+
+    public String parseDropTableSQL(String dbName, String tableName, boolean ifExist) {
+        if (ifExist) {
+            return String.format("DROP TABLE IF EXISTS `%s`.`%s`", dbName, tableName);
+        }
+        else {
+            return String.format("DROP TABLE `%s`.`%s`", dbName, tableName);
+        }
+    }
+
     public String parseDropTableSQL(String dbName, String tableName) {
-        // not use 'IF EXISTS' here to allow exceptions
-        return String.format("DROP TABLE `%s`.`%s`", dbName, tableName);
+        return parseDropTableSQL(dbName, tableName, false);
     }
 }

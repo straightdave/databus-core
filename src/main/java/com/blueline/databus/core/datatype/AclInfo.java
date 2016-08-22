@@ -21,7 +21,7 @@ public class AclInfo {
     /**
      * 设定的时间范围,如'00002359'表示从00时00分到23时59分,即全天(可用'0'简单表示)
      */
-    @JsonProperty(required = true)
+    @JsonProperty(required = true, defaultValue = "0")
     private String duration;
 
     public String getApi() {

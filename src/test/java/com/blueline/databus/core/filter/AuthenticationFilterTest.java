@@ -79,7 +79,7 @@ public class AuthenticationFilterTest {
         String dummyApi = "http://localhost:8888/api/data/db1/table1?id=1";
 
         // 如果appkey是XYZ123,其skey也是
-        String reqMac = MACHelper.calculateMAC(adminConfig.getSkey(), "/api/data/db1/table1?id=1");
+        String reqMac = MACHelper.calculateMAC(adminConfig.getSkey(), "XYZ123_GET_/api/data/db1/table1?id=1");
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("x-appkey", adminConfig.getAppkey());
@@ -96,21 +96,25 @@ public class AuthenticationFilterTest {
     public void get_skey_from_db_right() {
         assertNotNull("SysDBDao could be autowired", sysDBDao);
 
-        // 测试数据中有记录,其appkey味appkey1, skey为skey1
+        // 测试数据中有记录,其appkey是appkey1, skey为skey1
 
         String skey = sysDBDao.getSKey("appkey1");
 
-        String dummyApi = "http://localhost:8888/api/data/db1/table1?id=1";
-        String reqMac = MACHelper.calculateMAC(skey, "/api/data/db1/table1?id=1");
+        assertTrue(skey.equals("skey1"));
+
+        String dummyApi = "http://localhost:8888/api/data/databus_core/table1?id=1";
+        String reqMac = MACHelper.calculateMAC(skey, skey + "_GET_/api/data/databus_core/table1?id=1");
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("x-appkey", "appkey1");
         headers.add("x-mac", reqMac);
 
-        ResponseEntity<RestResult> result = restTemplate.exchange(
+        ResponseEntity<RestResult> resp = restTemplate.exchange(
                 dummyApi, HttpMethod.GET, new HttpEntity<>(headers), RestResult.class);
 
-        assertNotEquals(ResultType.FAIL, result.getBody().getResultType());
-        assertFalse(result.getBody().getMessage().contains("MAC not match"));
+        System.out.println(resp.getBody());
+
+        assertEquals(ResultType.FAIL, resp.getBody().getResultType());
+        assertTrue(resp.getBody().getMessage().contains("MAC not match"));
     }
 }

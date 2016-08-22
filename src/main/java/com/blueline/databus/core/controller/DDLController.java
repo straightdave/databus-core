@@ -5,6 +5,7 @@ import com.blueline.databus.core.dao.SysDBDao;
 import com.blueline.databus.core.exception.InternalException;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,8 +30,8 @@ public class DDLController{
     @Autowired
     private CoreDBDao coreDBDao;
 
-    @Autowired
-    private SysDBDao sysDBDao;
+//    @Autowired
+//    private SysDBDao sysDBDao;
 
     @RequestMapping(value = "/{dbName}/{tableName}", method = POST)
     public RestResult createTable(
@@ -48,18 +49,13 @@ public class DDLController{
 
             String appkey = request.getHeader("x-appkey");
 
-            if (coreDBDao.createTable(dbName, tableName, body) > 0) {
-                // 如果建表成功,添加默认接口
-                if (sysDBDao.doAfterTableCreated(dbName, tableName, appkey) > 0) {
-                    return new RestResult(ResultType.OK, "Table created");
-                }
-            }
-            return new RestResult(ResultType.FAIL, "Table creating failed");
+            coreDBDao.createTable(dbName, tableName, body);
         }
-        catch (InternalException | IOException ex) {
+        catch (InternalException | IOException | DataAccessException ex) {
             logger.error(ex.getMessage());
             return new RestResult(ResultType.ERROR, ex.getMessage());
         }
+        return new RestResult(ResultType.OK, "table created");
     }
 
     @RequestMapping(value = "/{dbName}/{tableName}", method = DELETE)
@@ -70,14 +66,11 @@ public class DDLController{
 
         try {
             coreDBDao.dropTable(dbName, tableName);
-
-            // delete table related interfaces
-
         }
-        catch (InternalException ex) {
-            logger.error(ex.getMessage());
-            return new RestResult(ResultType.ERROR, ex.getMessage());
+        catch (DataAccessException ex) {
+            return new RestResult(ResultType.FAIL, "drop table failed: " + ex.getMessage());
         }
+
         return new RestResult(ResultType.OK, "Table Dropped");
     }
 }

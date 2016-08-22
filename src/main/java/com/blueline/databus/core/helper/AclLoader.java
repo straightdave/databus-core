@@ -23,7 +23,7 @@ public class AclLoader {
 
     public int preloadAcl() {
         try {
-            List<AclInfo> aclList = sysDBDao.getAclInfo();
+            List<AclInfo> aclList = sysDBDao.getAllAclInfo();
             return redisHelper.loadAcl(aclList, true); // 清理其它数据,重新加载全部
         }
         catch (Exception ex) {

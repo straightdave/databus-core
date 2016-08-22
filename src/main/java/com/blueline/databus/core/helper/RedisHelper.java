@@ -6,6 +6,7 @@ import com.blueline.databus.core.configtype.RedisConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import redis.clients.jedis.Jedis;
@@ -21,6 +22,7 @@ import java.util.List;
 @Component
 public class RedisHelper {
     private final Logger logger = Logger.getLogger(RedisHelper.class);
+
 
     private static JedisPool jedisPool = null;
     private RedisConfig redisConfig;

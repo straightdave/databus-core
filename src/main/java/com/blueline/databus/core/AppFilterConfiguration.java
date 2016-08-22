@@ -20,7 +20,7 @@ public class AppFilterConfiguration {
         return registration;
     }
 
-    @Bean(name="authenticationFilter")
+    @Bean
     public AuthenticationFilter authenticationFilter() {
         return new AuthenticationFilter();
     }
@@ -35,7 +35,7 @@ public class AppFilterConfiguration {
         return registration;
     }
 
-    @Bean(name="authorityFilter")
+    @Bean
     public AuthorityFilter authorityFilter() {
         return new AuthorityFilter();
     }
@@ -50,7 +50,7 @@ public class AppFilterConfiguration {
         return registration;
     }
 
-    @Bean(name="corsFilter")
+    @Bean
     public CorsFilter corsFilter() {
         return new CorsFilter();
     }

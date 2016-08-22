@@ -1,42 +1,26 @@
 package com.blueline.databus.core.dao;
 
 import com.blueline.databus.core.datatype.AclInfo;
-import com.blueline.databus.core.configtype.SysDBConfig;
-import org.apache.log4j.Logger;
+import com.blueline.databus.core.datatype.Client;
+import com.blueline.databus.core.helper.RandomStringHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.sql.*;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
-/**
- * databus系统信息db处理helper
- */
-@Component
+@Repository
 public class SysDBDao {
-    private static final Logger logger = Logger.getLogger(SysDBDao.class);
-
-
-
-    private Connection conn = null;
 
     @Autowired
-    private SysDBDao(SysDBConfig config) {
-        sysDBConfig = config;
-
-        try {
-            Class.forName(sysDBConfig.getDriverManager());
-            conn = DriverManager.getConnection(
-                    sysDBConfig.getUrl(),
-                    sysDBConfig.getUsername(),
-                    sysDBConfig.getPassword());
-        }
-        catch (ClassNotFoundException | SQLException ex) {
-            logger.error("init DB: " + ex.getMessage());
-        }
-    }
+    @Qualifier("templateSys")
+    private JdbcTemplate templateSys;
 
     /**
      * 通过appkey从DB里面拿skey
@@ -44,22 +28,9 @@ public class SysDBDao {
      * @return skey client的secure key
      */
     public String getSKey(String appKey) {
-        String sql = String.format("SELECT skey FROM clients WHERE appkey='%s'", appKey);
-        String result = null;
-
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ResultSet rs = ps.executeQuery();
-            while(rs.next()) {
-                result = rs.getString("skey");
-                if (!StringUtils.isEmpty(result)) {
-                    break; // 只获取第一个(理论上只应该有一个)
-                }
-            }
-        }
-        catch (SQLException ex) {
-            logger.error("getSKey: " + ex.getMessage());
-        }
-        return result;
+        return this.templateSys.queryForObject(
+                "SELECT `skey` FROM `clients` WHERE `appkey` = ?",
+                String.class, appKey);
     }
 
     /**
@@ -67,22 +38,63 @@ public class SysDBDao {
      * 只在同package的AclLoader类中使用
      * @return AclInfo的数组
      */
-    public List<AclInfo> getAclInfo() {
-        String sql = "SELECT `id`, `api`, `method`, `appkey`, `duration` FROM `acl`";
-        List<AclInfo> result = new LinkedList<>();
-
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ResultSet rs = ps.executeQuery();
-            while(rs.next()) {
-                result.add(new AclInfo(
-                                rs.getString("api"),
-                                rs.getString("method"),
-                                rs.getString("appkey"),
-                                rs.getString("duration")));
+    public List<AclInfo> getAllAclInfo() {
+        return this.templateSys.query(
+            "SELECT `api`, `method`, `appkey`, `duration` FROM `databus_sys`.`acl`",
+            new RowMapper<AclInfo>() {
+                public AclInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return new AclInfo(
+                        rs.getString("api"),
+                        rs.getString("method"),
+                        rs.getString("appkey"),
+                        rs.getString("duration")
+                    );
+                }
             }
+        );
+    }
+
+    public AclInfo getAclInfoByApi(String api) {
+        return this.templateSys.queryForObject(
+            "SELECT `api`, `method`, `appkey`, `duration` FROM `databus_sys`.`acl` WHERE `api` = ?",
+            new Object[] { api },
+            new RowMapper<AclInfo>() {
+                public AclInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
+                    return new AclInfo(
+                        rs.getString("api"),
+                        rs.getString("method"),
+                        rs.getString("appkey"),
+                        rs.getString("duration")
+                    );
+                }
+            }
+        );
+    }
+
+    public AclInfo checkAclInfo(String api, String method, String appKey) {
+        System.out.println("==> check acl from sys db: " + api);
+
+        AclInfo result;
+        try {
+            result = this.templateSys.queryForObject(
+                    "SELECT `api`, `method`, `appkey`, `duration` FROM `databus_sys`.`acl` WHERE `api` = ? AND `method` = ? AND `appkey` = ?",
+                    new Object[]{api, method, appKey},
+                    new RowMapper<AclInfo>() {
+                        public AclInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
+                            return new AclInfo(
+                                    rs.getString("api"),
+                                    rs.getString("method"),
+                                    rs.getString("appkey"),
+                                    rs.getString("duration")
+                            );
+                        }
+                    }
+            );
         }
-        catch (SQLException ex) {
-            logger.error("SysDBDao: getAclInfo: " + ex.getMessage());
+        catch (Exception ex) {
+            // 不向上层抛出异常,上层用返回值区别结果
+            System.err.println("==> check acl failed: " + ex.getMessage());
+            return null;
         }
         return result;
     }
@@ -106,6 +118,24 @@ public class SysDBDao {
 
 
         return 1;
+    }
+
+    public int refreshKeys(int clientId) {
+        String newAppKey = RandomStringHelper.getRandomString(10);
+        String newSKey = RandomStringHelper.hashKey(newAppKey);
+
+        String sql = String.format("UPDATE `databus_sys`.`clients` SET `appkey` = '%s', `skey` = '%s' WHERE `id` = '%s'",
+                newAppKey, newSKey, clientId);
+        return this.templateSys.update(sql);
+    }
+
+    public int refreshKeys(String name) {
+        String newAppKey = RandomStringHelper.getRandomString(10);
+        String newSKey = RandomStringHelper.hashKey(newAppKey);
+
+        String sql = String.format("UPDATE `databus_sys`.`clients` SET `appkey` = '%s', `skey` = '%s' WHERE `name` = '%s'",
+                newAppKey, newSKey, name);
+        return this.templateSys.update(sql);
     }
 
 }

@@ -1,8 +1,10 @@
 package com.blueline.databus.core.filter;
 
+import com.blueline.databus.core.dao.AclCacheService;
+import com.blueline.databus.core.dao.SysDBDao;
+import com.blueline.databus.core.datatype.AclInfo;
 import com.blueline.databus.core.datatype.RestResult;
 import com.blueline.databus.core.helper.FilterResponseRender;
-import com.blueline.databus.core.helper.RedisHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.*;
@@ -18,23 +20,48 @@ import static com.blueline.databus.core.datatype.ResultType.*;
 public class AuthorityFilter implements Filter {
 
     @Autowired
-    private RedisHelper redisHelper;
+    private AclCacheService aclCacheService;
+
+    @Autowired
+    private SysDBDao sysDBDao;
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
             throws IOException, ServletException {
 
         HttpServletRequest request = (HttpServletRequest)req;
+        String api = request.getRequestURI();
+        String method = request.getMethod();
+        String appKey = request.getHeader("x-appkey");
 
-        if (redisHelper.checkAccess(
-                request.getRequestURI(),
-                request.getMethod(),
-                request.getHeader("x-appkey")))
-        {
-            chain.doFilter(req, resp);
-        }
-        else {
+        try {
+            int redisCheckState = aclCacheService.checkAccess(api, method, appKey);
+
+            if (redisCheckState == 2) {
+                System.out.println("==> admin pass");
+                chain.doFilter(req, resp);
+            }
+            else if (redisCheckState == 1) {
+                System.out.println("==> check pass");
+                chain.doFilter(req, resp);
+            }
+            else if (redisCheckState == 0) {
+                System.out.println("==> redis no entry, check DB then load entry");
+                AclInfo acl = sysDBDao.checkAclInfo(api, method, appKey);
+                if (acl != null) {
+                    System.out.println("==> check pass, load to cache");
+                    aclCacheService.loadOneAcl(acl);
+                    chain.doFilter(req, resp);
+                }
+            }
+
+            System.out.println("==> no access");
             RestResult result = new RestResult(FAIL, "No Access");
+            FilterResponseRender.render(resp, result);
+        }
+        catch (Exception ex) {
+            System.out.println("==> no access due to error");
+            RestResult result = new RestResult(ERROR, "No Access: " + ex.getMessage());
             FilterResponseRender.render(resp, result);
         }
     }
