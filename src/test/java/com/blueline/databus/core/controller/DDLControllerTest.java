@@ -1,6 +1,7 @@
 package com.blueline.databus.core.controller;
 
 import com.blueline.databus.core.dao.CoreDBDao;
+import com.blueline.databus.core.dao.SysDBDao;
 import com.blueline.databus.core.datatype.RestResult;
 import com.blueline.databus.core.datatype.ResultType;
 import com.blueline.databus.core.exception.InternalException;
@@ -24,9 +25,13 @@ public class DDLControllerTest {
     @Autowired
     private CoreDBDao coreDBDao;
 
+    @Autowired
+    private SysDBDao sysDBDao;
+
     @Test
     public void drop_non_exist_table() {
 
+        // clean same name table
         coreDBDao.dropTableIfExist("databus_core", "tb1");
 
         TestRestTemplate template = new TestRestTemplate();
@@ -36,21 +41,21 @@ public class DDLControllerTest {
         headers.set("x-appkey", "XYZ123");
         headers.set("x-mac", MACHelper.calculateMAC("XYZ123", "XYZ123_DELETE_/api/db/databus_core/tb1"));
 
-        HttpEntity<String> entity = new HttpEntity<>("delete", headers);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<RestResult> resp =
                 template.exchange(url, HttpMethod.DELETE, entity, RestResult.class);
 
         System.out.println(resp.getBody());
 
-        assertEquals(ResultType.FAIL, resp.getBody().getResultType());
+        assertNotEquals(ResultType.OK, resp.getBody().getResultType());
     }
 
     @Test
     public void drop_existing_table() throws InternalException {
 
+        // ensure table exists
         String jsonBody = "[{\"name\":\"username\",\"type\":\"varchar(255)\"}]";
         coreDBDao.createTableIfNotExist("databus_core", "testtable1", jsonBody);
-
 
         TestRestTemplate template = new TestRestTemplate();
         String url = "http://localhost:8888/api/db/databus_core/testtable1";
@@ -59,7 +64,7 @@ public class DDLControllerTest {
         headers.set("x-appkey", "XYZ123");
         headers.set("x-mac", MACHelper.calculateMAC("XYZ123", "XYZ123_DELETE_/api/db/databus_core/testtable1"));
 
-        HttpEntity<String> entity = new HttpEntity<>("delete", headers);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<RestResult> resp =
                 template.exchange(url, HttpMethod.DELETE, entity, RestResult.class);
 
@@ -69,9 +74,11 @@ public class DDLControllerTest {
     }
 
     @Test
-    public void can_create_table() {
+    public void can_create_table() throws InternalException {
 
+        // clean same name
         coreDBDao.dropTableIfExist("databus_core", "tb1");
+        sysDBDao.doAfterTableDropped("databus_core", "tb1");
 
         TestRestTemplate template = new TestRestTemplate();
         String url = "http://localhost:8888/api/db/databus_core/tb1";
@@ -82,6 +89,7 @@ public class DDLControllerTest {
         headers.set("x-appkey", "XYZ123");
         headers.set("Content-Type", "application/json");
         headers.set("x-mac", MACHelper.calculateMAC("XYZ123", "XYZ123_POST_/api/db/databus_core/tb1"));
+        headers.set("x-ownerid", "1");
 
         HttpEntity<String> entity = new HttpEntity<>(body, headers);
 
@@ -89,9 +97,12 @@ public class DDLControllerTest {
                 template.exchange(url, HttpMethod.POST, entity, RestResult.class);
 
         System.out.println(resp.getBody());
-
         assertEquals(ResultType.OK, resp.getBody().getResultType());
 
+        // TODO: to check sys tables
+
+        // clean
         coreDBDao.dropTableIfExist("databus_core", "tb1");
+        sysDBDao.doAfterTableDropped("databus_core", "tb1");
     }
 }

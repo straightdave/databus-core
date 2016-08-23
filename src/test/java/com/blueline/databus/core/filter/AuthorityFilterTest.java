@@ -30,6 +30,7 @@ public class AuthorityFilterTest {
 
     @Test
     public void non_admin_has_no_access() throws InternalException {
+
         String jsonBody = "[{\"name\":\"name\",\"type\":\"varchar(255)\"}]";
         coreDBDao.createTableIfNotExist("databus_core", "table1", jsonBody);
         System.out.println("===> test table created");
@@ -48,7 +49,7 @@ public class AuthorityFilterTest {
         System.out.println(result.getBody());
 
         assertNotEquals(ResultType.OK, result.getBody().getResultType());
-        assertEquals("No Access", result.getBody().getMessage());
+        assertTrue(result.getBody().getMessage().contains("No Access"));
 
         coreDBDao.dropTableIfExist("databus_core", "table1");
         System.out.println("===> test table dropped");

@@ -24,6 +24,9 @@ redis:
 server:
     port: 8888
 
+logging:
+    path: log
+
 default:
     defaultTakes: 10
     maxPOSTLength: 4096

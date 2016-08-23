@@ -8,17 +8,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-
+import javax.servlet.http.HttpServletRequest;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 import com.blueline.databus.core.datatype.RestResult;
 import com.blueline.databus.core.datatype.ResultType;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.stream.Collectors;
-
+/**
+ * 定义数据(DDL)相关的服务接口
+ */
 @RestController
 @RequestMapping("/api/db")
 public class DDLController{
@@ -35,25 +33,30 @@ public class DDLController{
 
     @RequestMapping(value = "/{dbName}/{tableName}", method = POST)
     public RestResult createTable(
-            @PathVariable("dbName") String dbName,
-            @PathVariable("tableName") String tableName
+            @PathVariable("dbName")    String dbName,
+            @PathVariable("tableName") String tableName,
+            @RequestBody String jsonBody
     ) {
-
         try {
-            // read request body
-            BufferedReader r = request.getReader();
-            String body = r.lines().collect(Collectors.joining(System.lineSeparator()));
-
-            if (StringUtils.isEmpty(body)) {
-                throw new InternalException("got no request body");
-            }
-
-            String appkey = request.getHeader("x-appkey");
-
-            coreDBDao.createTable(dbName, tableName, body);
+            coreDBDao.createTable(dbName, tableName, jsonBody);
         }
         catch (Exception ex) {
-            logger.error(ex.getMessage());
+            logger.fatal("table creating failed: " + ex.getMessage());
+            return new RestResult(ResultType.ERROR, ex.getMessage());
+        }
+
+        try {
+            String clientId = request.getHeader("x-ownerid");
+            if (StringUtils.isEmpty(clientId)) {
+                // 调用此api的人(管理员)没有传递建表人的id
+                throw new InternalException("header:x-ownerid is not provided.");
+            }
+            int owner_id = Integer.valueOf(clientId);
+            sysDBDao.doAfterTableCreated(dbName, tableName, owner_id);
+        }
+        catch (Exception ex) {
+            logger.fatal("Post-Creation action failed, rollback table creation: " + ex.getMessage());
+            coreDBDao.dropTableIfExist(dbName, tableName);
             return new RestResult(ResultType.ERROR, ex.getMessage());
         }
         return new RestResult(ResultType.OK, "table created");
@@ -64,14 +67,21 @@ public class DDLController{
             @PathVariable("dbName") String dbName,
             @PathVariable("tableName") String tableName
     ) {
-
         try {
             coreDBDao.dropTable(dbName, tableName);
         }
         catch (DataAccessException ex) {
-            return new RestResult(ResultType.FAIL, "drop table failed: " + ex.getMessage());
+            logger.fatal(ex.getMessage());
+            return new RestResult(ResultType.ERROR, ex.getMessage());
         }
 
+        try {
+            sysDBDao.doAfterTableDropped(dbName, tableName);
+        }
+        catch (Exception ex) {
+            logger.fatal("Post-Dropping action failed, but do not roll back table dropping");
+            return new RestResult(ResultType.ERROR, ex.getMessage());
+        }
         return new RestResult(ResultType.OK, "Table Dropped");
     }
 }

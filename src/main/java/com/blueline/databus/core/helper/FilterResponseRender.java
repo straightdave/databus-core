@@ -12,12 +12,21 @@ import javax.servlet.ServletResponse;
  */
 public class FilterResponseRender {
     public static void render(ServletResponse resp, RestResult result) {
-        try (PrintWriter writer = resp.getWriter()) {
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter(resp.getOutputStream());
             resp.setCharacterEncoding("utf-8");
             resp.setContentType("application/json");
             writer.print(result.toString());
-        } catch (IOException ex) {
+            writer.flush();
+        }
+        catch (IOException ex) {
             System.err.print(ex.getMessage());
+        }
+        finally {
+            if (writer != null) {
+                writer.close();
+            }
         }
     }
 }

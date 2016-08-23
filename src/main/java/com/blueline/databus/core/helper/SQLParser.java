@@ -194,7 +194,7 @@ public class SQLParser {
      *                 ]</code>
      *
      * @param columnInfoList 列信息
-     * @return sql整句 INSERT INTO `%s`.`%s` (... ) VALUES (...), (...), ...
+     * @return sql整句 <code>INSERT INTO `%s`.`%s` (... ) VALUES (...), (...), ...</code>
      * @throws InternalException 内部异常
      */
     public String parseSQL4Insert(String jsonBody, final List<ColumnInfo> columnInfoList)
@@ -277,7 +277,7 @@ public class SQLParser {
      * 这两个参数组成UPDATE语句中的 <code>"WHERE `colName` = 'colValue'"</code> 条件句
      * 修改信息是在body中的json字符串,形式大概像insert所需类似:
      *
-     * <code>[{"name":"dave", "age":"18", "sex":"male"}] </code>
+     * <code> [{"name":"dave", "age":"18", "sex":"male"}] </code>
      *
      * 只不过,只有第一个json元素值会拿来使用
      * 它组成UPDATE语句中的 "SET `xxx` = 'yyy' " 部分

@@ -45,8 +45,14 @@ public class AuthorityFilter implements Filter {
                 System.out.println("==> check pass");
                 chain.doFilter(req, resp);
             }
-            else if (redisCheckState == 0) {
-                System.out.println("==> redis no entry, check DB then load entry");
+            else if (redisCheckState == 0 || redisCheckState == -2) {
+                if (redisCheckState == 0) {
+                    System.out.println("==> redis no entry, check DB then load entry");
+                }
+                else {
+                    System.out.println("==> redis error, check DB then load entry");
+                }
+
                 AclInfo acl = sysDBDao.checkAclInfo(api, method, appKey);
                 if (acl != null) {
                     System.out.println("==> check pass, load to cache");
@@ -60,7 +66,7 @@ public class AuthorityFilter implements Filter {
             FilterResponseRender.render(resp, result);
         }
         catch (Exception ex) {
-            System.out.println("==> no access due to error");
+            System.out.println("==> no access due to error: " + ex.getMessage());
             RestResult result = new RestResult(ERROR, "No Access: " + ex.getMessage());
             FilterResponseRender.render(resp, result);
         }

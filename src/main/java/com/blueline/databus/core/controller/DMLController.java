@@ -2,12 +2,10 @@ package com.blueline.databus.core.controller;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import com.blueline.databus.core.dao.CoreDBDao;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 import com.blueline.databus.core.datatype.RestResult;
@@ -30,14 +28,13 @@ public class DMLController {
     @Autowired
     private CoreDBDao coreDBDao;
 
-    @RequestMapping(value = "/{dbName}/{realTableName}", method = GET)
+    @RequestMapping(value = "/{dbName}/{tableName}", method = GET)
     public RestResult queryData(
-        @PathVariable("dbName") String dbName,
-        @PathVariable("realTableName") String tableName
+        @PathVariable("dbName")    String dbName,
+        @PathVariable("tableName") String tableName
     ) {
         try {
             String jsonData = coreDBDao.queryData(dbName, tableName, request.getParameterMap());
-
             response.setHeader("Cache-Control", "public");
             response.setHeader("Cache-Control", "must-revalidate");
             response.setHeader("Cache-Control", "max-age=3600");
@@ -49,13 +46,13 @@ public class DMLController {
         }
     }
 
-    @RequestMapping(value = "/{dbName}/{realTableName}", method = DELETE)
+    @RequestMapping(value = "/{dbName}/{tableName}", method = DELETE)
     public RestResult deleteData(
-        @PathVariable("dbName") String dbName,
-        @PathVariable("realTableName") String realTableName
+        @PathVariable("dbName")    String dbName,
+        @PathVariable("tableName") String tableName
     ) {
         try {
-            int count = coreDBDao.deleteData(dbName, realTableName, request.getParameterMap());
+            int count = coreDBDao.deleteData(dbName, tableName, request.getParameterMap());
             if (count > 0) {
                 return new RestResult(ResultType.OK, String.format("%d rows deleted", count));
             }
@@ -64,19 +61,19 @@ public class DMLController {
             }
         }
         catch (Exception ex) {
-            logger.info(ex.getMessage());
+            logger.fatal(ex.getMessage());
             return new RestResult(ResultType.ERROR, ex.getMessage());
         }
     }
 
-    @RequestMapping(value = "/{dbName}/{realTableName}", method = POST)
+    @RequestMapping(value = "/{dbName}/{tableName}", method = POST)
     public RestResult insertData(
-        @PathVariable("dbName") String dbName,
-        @PathVariable("realTableName") String realTableName,
+        @PathVariable("dbName")    String dbName,
+        @PathVariable("tableName") String tableName,
         @RequestBody String jsonBody
     ) {
         try {
-            int count = coreDBDao.insertData(dbName, realTableName, jsonBody);
+            int count = coreDBDao.insertData(dbName, tableName, jsonBody);
             if (count > 0) {
                 return new RestResult(ResultType.OK, String.format("%s rows inserted", count));
             }
@@ -85,17 +82,17 @@ public class DMLController {
             }
         }
         catch (Exception ex) {
-            logger.info(ex.getMessage());
+            logger.fatal(ex.getMessage());
             return new RestResult(ResultType.ERROR, ex.getMessage());
         }
     }
 
     @RequestMapping(value = "/{dbName}/{tableName}/{colName}/{colValue}", method = PUT)
     public RestResult updateData(
-        @PathVariable("dbName") String dbName,
+        @PathVariable(value = "dbName")    String dbName,
         @PathVariable("tableName") String tableName,
-        @PathVariable("colName") String colName,
-        @PathVariable("colValue") String colValue,
+        @PathVariable("colName")   String colName,
+        @PathVariable("colValue")  String colValue,
         @RequestBody String jsonBody
     ) {
         try {
@@ -108,7 +105,7 @@ public class DMLController {
             }
         }
         catch (Exception ex) {
-            logger.info(ex.getMessage());
+            logger.fatal(ex.getMessage());
             return new RestResult(ResultType.ERROR, ex.getMessage());
         }
     }

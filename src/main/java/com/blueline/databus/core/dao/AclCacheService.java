@@ -41,35 +41,39 @@ public class AclCacheService {
      *     <li>1 - 缓存中有记录,而且可以访问</li>
      *     <li>2 - 表示输入的appkey表明访问者是管理员,可以访问</li>
      *     <li><strong>-1</strong> - 缓存中有记录,但是记录显示无权限访问</li>
+     *     <li><strong>-2</strong> - 缓存检查过程出现错误</li>
      * </ul>
-     * @throws InternalException 内部异常(调用TimeHelper判断可否访问时可能抛出), @see #TimeHelper
-     * @throws IOException IO异常(解析缓存中值,即json格式数据时,可能抛出)
      */
-    public int checkAccess(String api, String method, String appkey)
-            throws InternalException, IOException {
+    public int checkAccess(String api, String method, String appkey) {
+        try {
+            if (!StringUtils.isEmpty(appkey) && appkey.equals(this.adminAppKey)) {
+                return 2; // this is admin, ignore checking
+            }
 
-        if (!StringUtils.isEmpty(appkey) && appkey.equals(this.adminAppKey)) {
-            return 2; // this is admin, ignore checking
+            String content = this.redisTemplate4Acl.opsForValue().get(api);
+
+            if (StringUtils.isEmpty(content)) {
+                return 0; // no access record in redis
+            }
+
+            AclInfo acl = new ObjectMapper().readValue(content, AclInfo.class);
+
+            String nowDate = new SimpleDateFormat("HHmm").format(new Date());
+            String duration = acl.getDuration();
+
+            if (method.equals(acl.getMethod()) &&
+                appkey.equals(acl.getAppkey()) &&
+                TimeHelper.isInDuration(nowDate, duration)
+            ) {
+                return 1; // can access by checking cache
+            }
+            else {
+                return -1; // cannot access by checking cache
+            }
         }
-
-        String content = this.redisTemplate4Acl.opsForValue().get(api);
-
-        if (StringUtils.isEmpty(content)) {
-            return 0; // no access record in redis
-        }
-
-        AclInfo acl = new ObjectMapper().readValue(content, AclInfo.class);
-
-        String nowDate = new SimpleDateFormat("HHmm").format(new Date());
-        String duration = acl.getDuration();
-
-        if (method.equals(acl.getMethod()) &&
-            appkey.equals(acl.getAppkey()) &&
-            TimeHelper.isInDuration(nowDate, duration)) {
-            return 1; // can access by checking cache
-        }
-        else {
-            return -1; // cannot access by checking cache
+        catch (Exception ex) {
+            // eat all exceptions
+            return -2; // exit by error
         }
     }
 
