@@ -40,10 +40,12 @@ public class AuthorityFilter implements Filter {
             if (redisCheckState == 2) {
                 System.out.println("==> admin pass");
                 chain.doFilter(req, resp);
+                return;
             }
             else if (redisCheckState == 1) {
                 System.out.println("==> check pass");
                 chain.doFilter(req, resp);
+                return;
             }
             else if (redisCheckState == 0 || redisCheckState == -2) {
                 if (redisCheckState == 0) {
@@ -58,6 +60,7 @@ public class AuthorityFilter implements Filter {
                     System.out.println("==> check pass, load to cache");
                     aclCacheService.loadOneAcl(acl);
                     chain.doFilter(req, resp);
+                    return;
                 }
             }
 

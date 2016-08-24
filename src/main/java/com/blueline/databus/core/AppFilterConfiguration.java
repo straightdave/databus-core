@@ -1,5 +1,6 @@
 package com.blueline.databus.core;
 
+import com.blueline.databus.core.filter.AdminFilter;
 import com.blueline.databus.core.filter.AuthenticationFilter;
 import com.blueline.databus.core.filter.AuthorityFilter;
 import com.blueline.databus.core.filter.CorsFilter;
@@ -53,5 +54,20 @@ public class AppFilterConfiguration {
     @Bean
     public CorsFilter corsFilter() {
         return new CorsFilter();
+    }
+
+    @Bean
+    public FilterRegistrationBean adminFilterRegistration() {
+        FilterRegistrationBean registration = new FilterRegistrationBean();
+        registration.setFilter(adminFilter());
+        registration.addUrlPatterns("/api/sys/*");
+        registration.setName("adminFilter");
+        registration.setOrder(4);
+        return registration;
+    }
+
+    @Bean
+    public AdminFilter adminFilter() {
+        return new AdminFilter();
     }
 }

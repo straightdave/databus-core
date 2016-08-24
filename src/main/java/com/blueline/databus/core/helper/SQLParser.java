@@ -60,18 +60,18 @@ public class SQLParser {
                 String[] v = entry.getValue();
 
                 // 对所有 *_start或*_stop 参数,如若同名多值,只支持其第一个值,即取v[0]
-                if (k.endsWith("_start")) {
-                    String columnName = k.substring(0, k.length() - "_start".length());
+                if (k.endsWith("_start") || k.endsWith("_begin") || k.endsWith("_gt")) {
+                    String columnName = k.substring(0, k.lastIndexOf("_"));
                     sqlQuery.append(String.format("`%s`>='%s' AND ", columnName, v[0]));
                 }
-                else if (k.endsWith("_stop")) {
-                    String columnName = k.substring(0, k.length() - "_stop".length());
+                else if (k.endsWith("_stop") || k.endsWith("_end") || k.endsWith("_lt")) {
+                    String columnName = k.substring(0, k.lastIndexOf("_"));
                     sqlQuery.append(String.format("`%s`<='%s' AND ", columnName, v[0]));
                 }
 
                 // 对于 *_not;多值可重复拼接
                 else if (k.endsWith("_not")) {
-                    String columnName = k.substring(0, k.length() - "_not".length());
+                    String columnName = k.substring(0, k.lastIndexOf("_"));
                     if (v.length > 1) {
                         sqlQuery.append("(");
                         for (String value : v) {
@@ -132,18 +132,18 @@ public class SQLParser {
                     String[] v = entry.getValue();
 
                     // 对所有 *_start或*_stop 参数,如若同名多值,只支持其第一个值,即取v[0]
-                    if (k.endsWith("_start")) {
-                        String columnName = k.substring(0, k.length() - "_start".length());
+                    if (k.endsWith("_start") || k.endsWith("_begin") || k.endsWith("_gt")) {
+                        String columnName = k.substring(0, k.lastIndexOf("_"));
                         sqlQuery.append(String.format("`%s`>='%s' AND ", columnName, v[0]));
                     }
-                    else if (k.endsWith("_stop")) {
-                        String columnName = k.substring(0, k.length() - "_stop".length());
+                    else if (k.endsWith("_stop") || k.endsWith("_end") || k.endsWith("_lt")) {
+                        String columnName = k.substring(0, k.lastIndexOf("_"));
                         sqlQuery.append(String.format("`%s`<='%s' AND ", columnName, v[0]));
                     }
 
                     // 对于 *_not;多值可重复拼接
                     else if (k.endsWith("_not")) {
-                        String columnName = k.substring(0, k.length() - "_not".length());
+                        String columnName = k.substring(0, k.lastIndexOf("_"));
                         if (v.length > 1) {
                             sqlQuery.append("(");
                             for (String value : v) {

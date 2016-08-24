@@ -18,7 +18,7 @@ import com.blueline.databus.core.datatype.ResultType;
  * 定义数据(DDL)相关的服务接口
  */
 @RestController
-@RequestMapping("/api/db")
+@RequestMapping("/api/def")
 public class DDLController{
     private final Logger logger = Logger.getLogger(DDLController.class);
 

@@ -1,6 +1,9 @@
 package com.blueline.databus.core.dao;
 
 import com.blueline.databus.core.datatype.AclInfo;
+import com.blueline.databus.core.datatype.ClientInfo;
+import com.blueline.databus.core.datatype.InterfaceInfo;
+import com.blueline.databus.core.datatype.TableInfo;
 import com.blueline.databus.core.exception.InternalException;
 import com.blueline.databus.core.helper.RandomStringHelper;
 import org.apache.log4j.Logger;
@@ -64,8 +67,7 @@ public class SysDBDao {
                         rs.getString("api"),
                         rs.getString("method"),
                         rs.getString("appkey"),
-                        rs.getString("duration")
-                    );
+                        rs.getString("duration"));
                 }
             }
         );
@@ -86,13 +88,19 @@ public class SysDBDao {
                         rs.getString("api"),
                         rs.getString("method"),
                         rs.getString("appkey"),
-                        rs.getString("duration")
-                    );
+                        rs.getString("duration"));
                 }
             }
         );
     }
 
+    /**
+     * 根据条件获取acl信息
+     * @param api api路径
+     * @param method http方法
+     * @param appKey 访问者appkey
+     * @return acl信息对象
+     */
     public AclInfo checkAclInfo(String api, String method, String appKey) {
         AclInfo result;
         try {
@@ -105,8 +113,7 @@ public class SysDBDao {
                                     rs.getString("api"),
                                     rs.getString("method"),
                                     rs.getString("appkey"),
-                                    rs.getString("duration")
-                            );
+                                    rs.getString("duration"));
                         }
                     }
             );
@@ -119,6 +126,130 @@ public class SysDBDao {
         return result;
     }
 
+    /**
+     * 获取所有表信息
+     * @return TableInfo的列表
+     */
+    public List<TableInfo> getTableInfo() {
+        return this.templateSys.query(
+                "SELECT `id`, `name`, `db_name`, `owner_id` FROM `databus_sys`.`tables`",
+                new RowMapper<TableInfo>() {
+                    public TableInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new TableInfo(
+                                rs.getInt("id"),
+                                rs.getString("name"),
+                                rs.getString("db_name"),
+                                rs.getInt("owner_id"));
+                    }
+                }
+        );
+    }
+
+    /**
+     * 根据表名和数据库名获取表信息
+     * @param dbName 数据库名
+     * @param tableName 表名
+     * @return 表信息列表
+     */
+    public TableInfo getTableInfoBy(String dbName, String tableName) {
+        return this.templateSys.queryForObject(
+                "SELECT `id`, `name`, `db_name`, `owner_id` FROM `databus_sys`.`tables` WHERE `name` = ? AND `db_name` = ?",
+                new Object[] {tableName, dbName},
+                new RowMapper<TableInfo>() {
+                    public TableInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new TableInfo(
+                                rs.getInt("id"),
+                                rs.getString("name"),
+                                rs.getString("db_name"),
+                                rs.getInt("owner_id"));
+                    }
+                }
+        );
+    }
+
+    public List<ClientInfo> getClients() {
+        return this.templateSys.query(
+                "SELECT `id`, `name`, `display_name`, `description`, `appkey`, `skey`, `client_type`, `client_category` FROM `databus_sys`.`clients`",
+                new RowMapper<ClientInfo>() {
+                    public ClientInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new ClientInfo(
+                                rs.getInt("id"),
+                                rs.getString("name"),
+                                rs.getString("display_name"),
+                                rs.getString("description"),
+                                rs.getString("appkey"),
+                                rs.getString("skey"),
+                                rs.getString("client_type"),
+                                rs.getString("client_category"));
+                    }
+                }
+        );
+    }
+
+    public ClientInfo getClientBy(String name) {
+        return this.templateSys.queryForObject(
+                "SELECT `id`, `name`, `display_name`, `description`, `appkey`, `skey`, `client_type`, `client_category` FROM `databus_sys`.`clients` WHERE `name` = ?",
+                new Object[] {name},
+                new RowMapper<ClientInfo>() {
+                    public ClientInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new ClientInfo(
+                                rs.getInt("id"),
+                                rs.getString("name"),
+                                rs.getString("display_name"),
+                                rs.getString("description"),
+                                rs.getString("appkey"),
+                                rs.getString("skey"),
+                                rs.getString("client_type"),
+                                rs.getString("client_category"));
+                    }
+                }
+        );
+    }
+
+    /**
+     * 获取所有API信息
+     * @return InterfaceInfo的列表
+     */
+    public List<InterfaceInfo> getInterfaceInfo() {
+        return this.templateSys.query(
+                "SELECT `id`, `table_name`, `db_name`, `api`, `method`, `description` FROM `databus_sys`.`interfaces`",
+                new RowMapper<InterfaceInfo>() {
+                    public InterfaceInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new InterfaceInfo(
+                                rs.getInt("id"),
+                                rs.getString("table_name"),
+                                rs.getString("db_name"),
+                                rs.getString("api"),
+                                rs.getString("method"),
+                                rs.getString("description"));
+                    }
+                }
+        );
+    }
+
+    /**
+     * 根据数据库名和表名获取api信息
+     * @param dbName 数据库名
+     * @param tableName 表名
+     * @return InterfaceInfo列表
+     */
+    public List<InterfaceInfo> getInterfaceInfoBy(String dbName, String tableName) {
+        return this.templateSys.query(
+                "SELECT `id`, `table_name`, `db_name`, `api`, `method`, `description` FROM `databus_sys`.`interfaces` WHERE `table_name` = ? AND `db_name` = ?",
+                new Object[] {tableName, dbName},
+                new RowMapper<InterfaceInfo>() {
+                    public InterfaceInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new InterfaceInfo(
+                                rs.getInt("id"),
+                                rs.getString("table_name"),
+                                rs.getString("db_name"),
+                                rs.getString("api"),
+                                rs.getString("method"),
+                                rs.getString("description"));
+                    }
+                }
+        );
+    }
 
     /**
      * 建表成功之后,需要为表增加表数据、增删改查(DML)的接口(API)数据
