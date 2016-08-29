@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.beans.PropertyVetoException;
@@ -16,6 +19,7 @@ import java.beans.PropertyVetoException;
  * 配置用于系统数据库(数据总线的系统数据定义)的数据源
  */
 @Configuration
+@EnableTransactionManagement
 public class SysDataSourceConfig {
 
     @Value("${db.sys.driverManager}")
@@ -43,5 +47,10 @@ public class SysDataSourceConfig {
     @Bean
     public JdbcTemplate templateSys(DataSource dsSys) throws PropertyVetoException {
         return new JdbcTemplate(dsSys);
+    }
+
+    @Bean
+    public PlatformTransactionManager txManager() throws PropertyVetoException {
+        return new DataSourceTransactionManager(dsSys());
     }
 }

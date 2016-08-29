@@ -1,6 +1,5 @@
 package com.blueline.databus.core.datatype;
 
-import com.blueline.databus.core.helper.RandomStringHelper;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -21,6 +20,9 @@ public class ClientInfo {
 
     @JsonProperty(required = true)
     private String description;
+
+    @JsonProperty(required = true)
+    private int status;
 
     @JsonProperty(required = true)
     private String appKey;
@@ -50,11 +52,15 @@ public class ClientInfo {
         return description;
     }
 
+    public int getStatus() {
+        return status;
+    }
+
     public String getAppKey() {
         return appKey;
     }
 
-    public String getsKey() {
+    public String getSKey() {
         return sKey;
     }
 
@@ -66,12 +72,13 @@ public class ClientInfo {
         return clientCategory;
     }
 
-    public ClientInfo(int id, String name, String displayName, String description, String appKey,
+    public ClientInfo(int id, String name, String displayName, String description, int status, String appKey,
                       String sKey, String clientType, String clientCategory) {
         this.id = id;
         this.name = name;
         this.displayName = displayName;
         this.description = description;
+        this.status = status;
         this.appKey = appKey;
         this.sKey = sKey;
         this.clientType = clientType;

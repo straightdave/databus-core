@@ -1,18 +1,16 @@
 package com.blueline.databus.core.dao;
 
 import com.blueline.databus.core.datatype.AclInfo;
-import com.blueline.databus.core.exception.InternalException;
 import com.blueline.databus.core.helper.TimeHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -20,61 +18,74 @@ import java.util.List;
  */
 @Repository
 public class AclCacheService {
-
-    @Value("${admin.appkey}")
-    private String adminAppKey;
-
-    @Value("${admin.skey}")
-    private String adminSKey;
+    private ObjectMapper om = new ObjectMapper();
 
     @Autowired
     private StringRedisTemplate redisTemplate4Acl;
 
     /**
-     * 检测redis缓存中的acl信息,判断某个client(通过其appkey)能否访问api
+     * 检测redis缓存中的acl信息,判断某个client(通过其name)能否访问api
+     * cache Key in format like "GET /xxx/xxx" or "POST /yyy/yyy"
+     * cache content is hash with {clientName}:{Acl json} as k-v pair
      * @param api api地址(是缓存键值)
      * @param method 访问方法(HTTP方法,如GET,POST等)
-     * @param appkey client的appkey
+     * @param clientName client的name
      * @return 结果状态
      * <ul>
      *     <li>0 - 缓存中没有该api对应值</li>
      *     <li>1 - 缓存中有记录,而且可以访问</li>
-     *     <li>2 - 表示输入的appkey表明访问者是管理员,可以访问</li>
      *     <li><strong>-1</strong> - 缓存中有记录,但是记录显示无权限访问</li>
      *     <li><strong>-2</strong> - 缓存检查过程出现错误</li>
      * </ul>
      */
-    public int checkAccess(String api, String method, String appkey) {
+    public int checkAccess(String api, String method, String clientName) {
         try {
-            if (!StringUtils.isEmpty(appkey) && appkey.equals(this.adminAppKey)) {
-                return 2; // this is admin, ignore checking
+            // cache key is in format like "GET /xxx/xxx", "POST /yyy/yyy", etc.
+            String cacheKey = String.format("%s %s", method.toUpperCase(), api);
+
+            AclInfo aclInfo = null;
+            if (this.redisTemplate4Acl.opsForHash().hasKey(cacheKey, clientName)) {
+                Object obj = this.redisTemplate4Acl.opsForHash().get(cacheKey, clientName);
+                aclInfo = om.readValue(obj.toString(), AclInfo.class);
             }
 
-            String content = this.redisTemplate4Acl.opsForValue().get(api);
+            if (aclInfo != null) {
+                String nowDate = new SimpleDateFormat("HHmm").format(new Date());
+                String duration = aclInfo.getDuration();
 
-            if (StringUtils.isEmpty(content)) {
-                return 0; // no access record in redis
+                if (method.equalsIgnoreCase(aclInfo.getMethod()) &&
+                    clientName.equals(aclInfo.getClientName())   &&
+                    TimeHelper.isInDuration(nowDate, duration)
+                ) {
+                    return 1; // can access by checking cache
+                }
+                else {
+                    return -1; // cannot access by checking cache
+                }
             }
 
-            AclInfo acl = new ObjectMapper().readValue(content, AclInfo.class);
-
-            String nowDate = new SimpleDateFormat("HHmm").format(new Date());
-            String duration = acl.getDuration();
-
-            if (method.equals(acl.getMethod()) &&
-                appkey.equals(acl.getAppkey()) &&
-                TimeHelper.isInDuration(nowDate, duration)
-            ) {
-                return 1; // can access by checking cache
-            }
-            else {
-                return -1; // cannot access by checking cache
-            }
+            return 0; // has no info in cache
         }
         catch (Exception ex) {
-            // eat all exceptions
-            return -2; // exit by error
+            // 不抛出异常是因为cache失效,系统默认会继续通过查询数据库处理
+            return -2;
         }
+    }
+
+    /**
+     * 返回目前缓存中所有acl信息
+     * @return AclInfo实例列表
+     */
+    public List<AclInfo> dumpAllAcl() {
+        List<AclInfo> result = new LinkedList<>();
+        this.redisTemplate4Acl.keys("\\w{1,10}\\s/.*").forEach(key ->
+            this.redisTemplate4Acl.opsForHash().values(key).forEach(acl -> {
+                try {
+                    om.readValue(acl.toString(), AclInfo.class);
+                } catch (IOException ex) { /* eat it */ }
+            })
+        );
+        return result;
     }
 
     /**
@@ -87,11 +98,12 @@ public class AclCacheService {
         int count = 0;
 
         if (cleanUnknown) {
-            this.redisTemplate4Acl.getConnectionFactory().getConnection().flushDb();
+            flushDB();
         }
 
         for(AclInfo item : aclList) {
-            this.redisTemplate4Acl.opsForValue().set(item.getApi(), item.toString());
+            String cacheKey = String.format("%s %s", item.getMethod().toUpperCase(), item.getApi());
+            this.redisTemplate4Acl.opsForValue().set(cacheKey, item.toString());
             count++;
         }
         return count;
@@ -111,7 +123,17 @@ public class AclCacheService {
      * @param aclInfo acl信息
      */
     public void loadOneAcl(AclInfo aclInfo) {
-        this.redisTemplate4Acl.opsForValue().set(aclInfo.getApi(), aclInfo.toString());
+        String cacheKey = String.format("%s %s", aclInfo.getMethod().toUpperCase(), aclInfo.getApi());
+        this.redisTemplate4Acl.opsForValue().set(cacheKey, aclInfo.toString());
+    }
+
+    /**
+     * 清除缓存中一条acl信息
+     * @param aclInfo 要清除的acl信息(AclInfo实例)
+     */
+    public void removeOneAcl(AclInfo aclInfo) {
+        String cacheKey = String.format("%s %s", aclInfo.getMethod().toUpperCase(), aclInfo.getApi());
+        this.redisTemplate4Acl.delete(cacheKey);
     }
 
     /**

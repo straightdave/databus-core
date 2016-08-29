@@ -13,6 +13,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.*;
 import java.util.*;
@@ -26,71 +27,207 @@ public class SysDBDao {
     private JdbcTemplate templateSys;
 
     /**
-     * 通过appkey获取用户的id
-     * @param appKey 用户的appkey
-     * @return 用户的id
+     * 根据client的id获取client信息
+     * @param id client的id
+     * @return ClientInfo实例
      */
-    public int getClientID(String appKey) {
-        try {
-            return this.templateSys.queryForObject(
-                    "SELECT `id` FROM `databus_sys`.`clients` WHERE `appkey` = ?",
-                    Integer.class, appKey);
-        }
-        catch (DataAccessException ex) {
-            logger.info("got no client id for appkey: " + appKey + ": " + ex.getMessage());
-            return -1;
-        }
-    }
-
-    /**
-     * 通过appkey获取用户的skey
-     * @param appKey client的app key
-     * @return 用户的skey
-     */
-    public String getSKey(String appKey) {
+    public ClientInfo getClientByID(int id) {
         return this.templateSys.queryForObject(
-                "SELECT `skey` FROM `databus_sys`.`clients` WHERE `appkey` = ?",
-                String.class, appKey);
-    }
-
-    /**
-     * 返回所有Acl数据表数据
-     * 只在同package的AclLoader类中使用
-     * @return AclInfo的数组
-     */
-    public List<AclInfo> getAllAclInfo() {
-        return this.templateSys.query(
-            "SELECT `api`, `method`, `appkey`, `duration` FROM `databus_sys`.`acl`",
-            new RowMapper<AclInfo>() {
-                public AclInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return new AclInfo(
-                        rs.getString("api"),
-                        rs.getString("method"),
+                "SELECT `id`,`name`,`display_name`,`description`,`status`,`appkey`,`skey`,`client_type`,`client_category` " +
+                "FROM `clients` WHERE `id` = ?",
+                new Object[]{id},
+                (ResultSet rs, int i) -> new ClientInfo(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("display_name"),
+                        rs.getString("description"),
+                        rs.getInt("status"),
                         rs.getString("appkey"),
-                        rs.getString("duration"));
-                }
-            }
+                        rs.getString("skey"),
+                        rs.getString("client_type"),
+                        rs.getString("client_category")
+                )
         );
     }
 
     /**
-     * 根据api路径获取acl信息对象
-     * @param api api路径
-     * @return acl信息
+     * 根据client的name(唯一、不变)获取client信息
+     * @param name client的name
+     * @return ClientInfo实例
      */
-    public AclInfo getAclInfoByApi(String api) {
+    public ClientInfo getClientByName(String name) {
         return this.templateSys.queryForObject(
-            "SELECT `api`, `method`, `appkey`, `duration` FROM `databus_sys`.`acl` WHERE `api` = ?",
-            new Object[] { api },
-            new RowMapper<AclInfo>() {
-                public AclInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return new AclInfo(
+                "SELECT `id`,`name`,`display_name`,`description`,`status`,`appkey`,`skey`,`client_type`,`client_category` " +
+                "FROM `clients` WHERE `name` = ?",
+                new Object[]{name},
+                (ResultSet rs, int i) -> new ClientInfo(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("display_name"),
+                        rs.getString("description"),
+                        rs.getInt("status"),
+                        rs.getString("appkey"),
+                        rs.getString("skey"),
+                        rs.getString("client_type"),
+                        rs.getString("client_category")
+                )
+        );
+    }
+
+    /**
+     * 根据client的appkey反向获取client信息
+     * @param appKey client的appkey
+     * @return ClientInfo实例
+     */
+    public ClientInfo getClientByAppKey(String appKey) {
+        return this.templateSys.queryForObject(
+                "SELECT `id`,`name`,`display_name`,`description`,`status`,`appkey`,`skey`,`client_type`,`client_category` " +
+                        "FROM `clients` WHERE `appkey` = ?",
+                new Object[]{appKey},
+                (ResultSet rs, int i) -> new ClientInfo(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("display_name"),
+                        rs.getString("description"),
+                        rs.getInt("status"),
+                        rs.getString("appkey"),
+                        rs.getString("skey"),
+                        rs.getString("client_type"),
+                        rs.getString("client_category")
+                )
+        );
+    }
+
+    /**
+     * 获取所有client信息
+     * @return ClientInfo实例列表
+     */
+    public List<ClientInfo> getClients() {
+        return this.templateSys.query(
+                "SELECT `id`, `name`, `display_name`, `description`, `appkey`, `skey`, `client_type`, `client_category` " +
+                "FROM `databus_sys`.`clients`",
+                (ResultSet rs, int i) -> new ClientInfo(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("display_name"),
+                        rs.getString("description"),
+                        rs.getInt("status"),
+                        rs.getString("appkey"),
+                        rs.getString("skey"),
+                        rs.getString("client_type"),
+                        rs.getString("client_category")
+                )
+        );
+    }
+
+
+    /**
+     * 创建新client
+     * @param name client名(唯一、不变)
+     * @param displayName 显示名称
+     * @param description 描述
+     * @param clientType 类型
+     * @param clientCategory 范畴
+     * @return 受影响行数
+     */
+    public int createClient(String name, String displayName, String description,
+                            String clientType, String clientCategory
+    ) {
+        return this.templateSys.update(
+                "INSERT INTO `clients`(`name`,`display_name`,`description`,`client_type`,`client_category`) " +
+                "VALUES (?,?,?,?,?)",
+                name, displayName, description, clientType, clientCategory
+        );
+    }
+
+    /**
+     * 通过client名将其状态置为'挂起(1)'; '0'为正常
+     * @param name client名
+     * @return 受影响行数
+     */
+    public int suspendClient(String name) {
+        return this.templateSys.update("UPDATE `clients` SET `status` = 1 WHERE `name` = ?", name);
+    }
+
+    /**
+     * 通过client名将其状态置为'正常(0)'
+     * @param name client名
+     * @return 受影响行数
+     */
+    public int resumeClient(String name) {
+        return this.templateSys.update("UPDATE `clients` SET `status` = 0 WHERE `name` = ?", name);
+    }
+
+    /**
+     * 重置client的appkey和skey
+     * @param name client名
+     * @return 受影响行数
+     */
+    public int refreshKeys(String name) {
+        String newAppKey = RandomStringHelper.getRandomString(10);
+        String newSKey = RandomStringHelper.hashKey(newAppKey);
+        return this.templateSys.update(
+                "UPDATE `clients` SET `appkey` = ?, `skey` = ? WHERE `name` = ?",
+                newAppKey, newSKey, name);
+    }
+
+
+    /**
+     * 读取数据库acl表(记载interface和client的关系)所有记录
+     * 将详细的acl信息填充到AclInfo实例列表
+     * 用于程序启动时载入acl信息到缓存
+     * @return AclInfo实例列表
+     */
+    public List<AclInfo> getAllAclInfo() {
+        return this.templateSys.query(
+            "SELECT `i`.`api` AS `api`, `i`.`method` AS `method`, `c`.`name` AS `client_name`, `a`.`duration` AS `duration` " +
+            "FROM `acl` AS `a` INNER JOIN `interfaces` AS `i` ON `a`.`interface_id` = `i`.`id` INNER JOIN `clients` AS `c` ON `a`.`client_id` = `c`.`id`",
+            (ResultSet rs, int rowNum) -> new AclInfo(
+                    rs.getString("api"),
+                    rs.getString("method"),
+                    rs.getString("client_name"),
+                    rs.getString("duration")
+            )
+        );
+    }
+
+    /**
+     * 根据接口id获取acl信息对象
+     * @param interfaceId 接口id
+     * @return AclInfo实例
+     */
+    public List<AclInfo> getAclInfoByInterface(int interfaceId) {
+        return this.templateSys.query(
+            "SELECT `i`.`api` AS `api`, `i`.`method` AS `method`, `c`.`name` AS `client_name`, `a`.`duration` AS `duration` " +
+            "FROM `acl` AS `a` INNER JOIN `interfaces` AS `i` ON `a`.`interface_id` = `i`.`id` INNER JOIN `clients` AS `c` ON `a`.`client_id` = `c`.`id` " +
+            "WHERE `i`.`id` = ?",
+            new Object[] {interfaceId},
+            (ResultSet rs, int rowNum) -> new AclInfo(
+                    rs.getString("api"),
+                    rs.getString("method"),
+                    rs.getString("client_name"),
+                    rs.getString("duration")
+            )
+        );
+    }
+
+    /**
+     * 根据用户name获取其acl记录列表
+     * @param clientName client名
+     * @return AclInfo实例列表
+     */
+    public List<AclInfo> getAclInfoByClient(String clientName) {
+        return this.templateSys.query(
+                "SELECT `i`.`api` AS `api`, `i`.`method` AS `method`, `c`.`name` AS `client_name`, `a`.`duration` AS `duration` " +
+                "FROM `acl` AS `a` INNER JOIN `interfaces` AS `i` ON `a`.`interface_id` = `i`.`id` INNER JOIN `clients` AS `c` ON `a`.`client_id` = `c`.`id` " +
+                "WHERE `c`.`name` = ?",
+                new Object[] {clientName},
+                (ResultSet rs, int rowNum) -> new AclInfo(
                         rs.getString("api"),
                         rs.getString("method"),
-                        rs.getString("appkey"),
-                        rs.getString("duration"));
-                }
-            }
+                        rs.getString("client_name"),
+                        rs.getString("duration")
+                )
         );
     }
 
@@ -98,24 +235,22 @@ public class SysDBDao {
      * 根据条件获取acl信息
      * @param api api路径
      * @param method http方法
-     * @param appKey 访问者appkey
-     * @return acl信息对象
+     * @param clientName 访问者name
+     * @return AclInfo实例列表(应该只有一个元素)
      */
-    public AclInfo checkAclInfo(String api, String method, String appKey) {
-        AclInfo result;
+    public List<AclInfo> checkAclInfo(String api, String method, String clientName) {
         try {
-            result = this.templateSys.queryForObject(
-                    "SELECT `api`, `method`, `appkey`, `duration` FROM `databus_sys`.`acl` WHERE `api` = ? AND `method` = ? AND `appkey` = ?",
-                    new Object[]{api, method, appKey},
-                    new RowMapper<AclInfo>() {
-                        public AclInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
-                            return new AclInfo(
-                                    rs.getString("api"),
-                                    rs.getString("method"),
-                                    rs.getString("appkey"),
-                                    rs.getString("duration"));
-                        }
-                    }
+            return this.templateSys.query(
+                    "SELECT `i`.`api` AS `api`, `i`.`method` AS `method`, `c`.`name` AS `client_name`, `a`.`duration` AS `duration` " +
+                    "FROM `acl` AS `a` INNER JOIN `interfaces` AS `i` ON `a`.`interface_id` = `i`.`id` INNER JOIN `clients` AS `c` ON `a`.`client_id` = `c`.`id` " +
+                    "WHERE `i`.`api` = ? AND `i`.`method` = ? AND `c`.`name` = ?",
+                    new Object[] {api, method, clientName},
+                    (ResultSet rs, int rowNum) -> new AclInfo(
+                            rs.getString("api"),
+                            rs.getString("method"),
+                            rs.getString("client_name"),
+                            rs.getString("duration")
+                    )
             );
         }
         catch (Exception ex) {
@@ -123,7 +258,40 @@ public class SysDBDao {
             System.err.println("==> got no acl from DB: " + ex.getMessage());
             return null;
         }
-        return result;
+    }
+
+
+    /**
+     * 授权某interface给某用户(新建acl记录)
+     * 会清除db中原有符合interface id和client name的记录
+     * @param interfaceId 接口id
+     * @param clientName client名
+     * @param duration 时间段
+     */
+    @Transactional("txManager")
+    public void grantInterfaceToClient(int interfaceId, String clientName, String duration) {
+        this.templateSys.update(
+                "DELETE FROM `acl` WHERE `interface_id` = ? AND `client_id` = (SELECT `id` FROM `clients` WHERE `name` = ?)",
+                interfaceId, clientName
+        );
+
+        this.templateSys.update(
+                "INSERT INTO `acl` (interface_id, client_id, duration) VALUES (?, (SELECT `id` FROM `clients` WHERE `name` = ?), ?)",
+                interfaceId, clientName, duration
+        );
+    }
+
+    /**
+     * 剥夺某用户对于某接口的权限(删除acl记录)
+     * 从db中清除后回尝试清理缓存
+     * @param interfaceId 接口id
+     * @param clientName client名
+     */
+    public void revokeInterfaceFromClient(int interfaceId, String clientName) {
+        this.templateSys.update(
+                "DELETE FROM `acl` WHERE `interface_id` = ? AND `client_id` = (SELECT `id` FROM `clients` WHERE `name` = ?)",
+                interfaceId, clientName
+        );
     }
 
     /**
@@ -132,16 +300,13 @@ public class SysDBDao {
      */
     public List<TableInfo> getTableInfo() {
         return this.templateSys.query(
-                "SELECT `id`, `name`, `db_name`, `owner_id` FROM `databus_sys`.`tables`",
-                new RowMapper<TableInfo>() {
-                    public TableInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new TableInfo(
-                                rs.getInt("id"),
-                                rs.getString("name"),
-                                rs.getString("db_name"),
-                                rs.getInt("owner_id"));
-                    }
-                }
+                "SELECT `id`, `name`, `db_name`, `owner_id` FROM `tables`",
+                (ResultSet rs, int rowNum) -> new TableInfo(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("db_name"),
+                        rs.getInt("owner_id")
+                )
         );
     }
 
@@ -153,58 +318,17 @@ public class SysDBDao {
      */
     public TableInfo getTableInfoBy(String dbName, String tableName) {
         return this.templateSys.queryForObject(
-                "SELECT `id`, `name`, `db_name`, `owner_id` FROM `databus_sys`.`tables` WHERE `name` = ? AND `db_name` = ?",
+                "SELECT `id`, `name`, `db_name`, `owner_id` FROM `tables` WHERE `name` = ? AND `db_name` = ?",
                 new Object[] {tableName, dbName},
-                new RowMapper<TableInfo>() {
-                    public TableInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new TableInfo(
-                                rs.getInt("id"),
-                                rs.getString("name"),
-                                rs.getString("db_name"),
-                                rs.getInt("owner_id"));
-                    }
-                }
+                (ResultSet rs, int rowNum) -> new TableInfo(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("db_name"),
+                        rs.getInt("owner_id")
+                )
         );
     }
 
-    public List<ClientInfo> getClients() {
-        return this.templateSys.query(
-                "SELECT `id`, `name`, `display_name`, `description`, `appkey`, `skey`, `client_type`, `client_category` FROM `databus_sys`.`clients`",
-                new RowMapper<ClientInfo>() {
-                    public ClientInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new ClientInfo(
-                                rs.getInt("id"),
-                                rs.getString("name"),
-                                rs.getString("display_name"),
-                                rs.getString("description"),
-                                rs.getString("appkey"),
-                                rs.getString("skey"),
-                                rs.getString("client_type"),
-                                rs.getString("client_category"));
-                    }
-                }
-        );
-    }
-
-    public ClientInfo getClientBy(String name) {
-        return this.templateSys.queryForObject(
-                "SELECT `id`, `name`, `display_name`, `description`, `appkey`, `skey`, `client_type`, `client_category` FROM `databus_sys`.`clients` WHERE `name` = ?",
-                new Object[] {name},
-                new RowMapper<ClientInfo>() {
-                    public ClientInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new ClientInfo(
-                                rs.getInt("id"),
-                                rs.getString("name"),
-                                rs.getString("display_name"),
-                                rs.getString("description"),
-                                rs.getString("appkey"),
-                                rs.getString("skey"),
-                                rs.getString("client_type"),
-                                rs.getString("client_category"));
-                    }
-                }
-        );
-    }
 
     /**
      * 获取所有API信息
@@ -212,18 +336,15 @@ public class SysDBDao {
      */
     public List<InterfaceInfo> getInterfaceInfo() {
         return this.templateSys.query(
-                "SELECT `id`, `table_name`, `db_name`, `api`, `method`, `description` FROM `databus_sys`.`interfaces`",
-                new RowMapper<InterfaceInfo>() {
-                    public InterfaceInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new InterfaceInfo(
-                                rs.getInt("id"),
-                                rs.getString("table_name"),
-                                rs.getString("db_name"),
-                                rs.getString("api"),
-                                rs.getString("method"),
-                                rs.getString("description"));
-                    }
-                }
+                "SELECT `id`, `table_name`, `db_name`, `api`, `method`, `description` FROM `interfaces`",
+                (ResultSet rs, int rowNum) -> new InterfaceInfo(
+                        rs.getInt("id"),
+                        rs.getString("table_name"),
+                        rs.getString("db_name"),
+                        rs.getString("api"),
+                        rs.getString("method"),
+                        rs.getString("description")
+                )
         );
     }
 
@@ -235,21 +356,41 @@ public class SysDBDao {
      */
     public List<InterfaceInfo> getInterfaceInfoBy(String dbName, String tableName) {
         return this.templateSys.query(
-                "SELECT `id`, `table_name`, `db_name`, `api`, `method`, `description` FROM `databus_sys`.`interfaces` WHERE `table_name` = ? AND `db_name` = ?",
+                "SELECT `id`, `table_name`, `db_name`, `api`, `method`, `description` FROM `interfaces` " +
+                "WHERE `table_name` = ? AND `db_name` = ?",
                 new Object[] {tableName, dbName},
-                new RowMapper<InterfaceInfo>() {
-                    public InterfaceInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new InterfaceInfo(
-                                rs.getInt("id"),
-                                rs.getString("table_name"),
-                                rs.getString("db_name"),
-                                rs.getString("api"),
-                                rs.getString("method"),
-                                rs.getString("description"));
-                    }
-                }
+                (ResultSet rs, int rowNum) -> new InterfaceInfo(
+                        rs.getInt("id"),
+                        rs.getString("table_name"),
+                        rs.getString("db_name"),
+                        rs.getString("api"),
+                        rs.getString("method"),
+                        rs.getString("description")
+                )
         );
     }
+
+    /**
+     * 根据接口id获取接口信息
+     * @param id 接口id
+     * @return InterfaceInfo实例
+     */
+    public InterfaceInfo getInterfaceInfoById(int id) {
+        return this.templateSys.queryForObject(
+                "SELECT `id`,`table_name`,`db_name`,`api`,`method`,`description` " +
+                "FROM `interfaces` WHERE `id` = ?",
+                new Object[] {id},
+                (ResultSet rs, int rowNum) -> new InterfaceInfo(
+                        rs.getInt("id"),
+                        rs.getString("table_name"),
+                        rs.getString("db_name"),
+                        rs.getString("api"),
+                        rs.getString("method"),
+                        rs.getString("description")
+                )
+        );
+    }
+
 
     /**
      * 建表成功之后,需要为表增加表数据、增删改查(DML)的接口(API)数据
@@ -262,9 +403,11 @@ public class SysDBDao {
             throws InternalException {
 
         String sql_add_table =
-                "INSERT INTO `tables` (`name`, `db_name`, `owner_id`, `created_at`) VALUES (?, ?, ?, now())";
+                "INSERT INTO `tables` (`name`,`db_name`,`owner_id`,`created_at`) " +
+                "VALUES (?, ?, ?, now())";
         String sql_add_interface =
-                "INSERT INTO `interfaces` (`table_name`, `db_name`, `api`, `method`, `created_at`) VALUES (?, ?, ?, ?, now())";
+                "INSERT INTO `interfaces` (`table_name`,`db_name`,`api`,`method`,`created_at`) " +
+                "VALUES (?, ?, ?, ?, now())";
 
         Connection conn = null;
         try {
@@ -397,31 +540,5 @@ public class SysDBDao {
         }
     }
 
-    /**
-     * 重置用户的appkey和skey
-     * @param clientId 用户id
-     * @return 受影响行数
-     */
-    public int refreshKeys(int clientId) {
-        String newAppKey = RandomStringHelper.getRandomString(10);
-        String newSKey = RandomStringHelper.hashKey(newAppKey);
-        String sql = String.format(
-                "UPDATE `databus_sys`.`clients` SET `appkey` = '%s', `skey` = '%s' WHERE `id` = '%s'",
-                newAppKey, newSKey, clientId);
-        return this.templateSys.update(sql);
-    }
 
-    /**
-     * 重置用户的appkey和skey
-     * @param name 用户名
-     * @return 受影响行数
-     */
-    public int refreshKeys(String name) {
-        String newAppKey = RandomStringHelper.getRandomString(10);
-        String newSKey = RandomStringHelper.hashKey(newAppKey);
-        String sql = String.format(
-                "UPDATE `databus_sys`.`clients` SET `appkey` = '%s', `skey` = '%s' WHERE `name` = '%s'",
-                newAppKey, newSKey, name);
-        return this.templateSys.update(sql);
-    }
 }

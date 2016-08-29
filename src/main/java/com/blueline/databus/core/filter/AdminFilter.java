@@ -2,10 +2,10 @@ package com.blueline.databus.core.filter;
 
 import com.blueline.databus.core.datatype.RestResult;
 import com.blueline.databus.core.helper.FilterResponseRender;
-import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 import static com.blueline.databus.core.datatype.ResultType.FAIL;

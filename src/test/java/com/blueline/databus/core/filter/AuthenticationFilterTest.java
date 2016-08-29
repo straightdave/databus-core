@@ -102,7 +102,7 @@ public class AuthenticationFilterTest {
 
         // 测试数据中有记录,其appkey是appkey1, skey为skey1
 
-        String skey = sysDBDao.getSKey("appkey1");
+        String skey = sysDBDao.getClientByAppKey("appkey1").getSKey();
 
         assertTrue(skey.equals("skey1"));
 

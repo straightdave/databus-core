@@ -70,7 +70,7 @@ public class AuthenticationFilter implements Filter {
             skey = adminSKey;
         }
         else {
-            skey = sysDBDao.getSKey(appKey);
+            skey = sysDBDao.getClientByAppKey(appKey).getSKey();
         }
 
         if (StringUtils.isEmpty(skey)) {
