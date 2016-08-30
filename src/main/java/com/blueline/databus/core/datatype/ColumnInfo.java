@@ -41,8 +41,8 @@ public class ColumnInfo {
 
     private String columnKey;
 
-    public ColumnInfo(String name, String columnType, boolean isNullable) {
-        this(name, "", -1, isNullable, columnType, "");
+    public ColumnInfo(String name, String columnType, boolean isNullable, String keys) {
+        this(name, "", -1, isNullable, columnType, keys);
     }
 
     public ColumnInfo(String name, String dataType, int position) {

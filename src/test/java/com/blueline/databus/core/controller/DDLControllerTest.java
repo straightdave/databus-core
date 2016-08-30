@@ -43,7 +43,8 @@ public class DDLControllerTest {
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("x-appkey", "XYZ123");
-        headers.set("x-mac", MACHelper.calculateMAC("XYZ123", "XYZ123_DELETE_/api/def/databus_core/tb1"));
+        headers.set("x-mac", MACHelper.calculateMAC(
+                "XYZ123", "XYZ123_DELETE_/api/def/databus_core/tb1"));
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<RestResult> resp =
@@ -59,14 +60,15 @@ public class DDLControllerTest {
 
         // ensure table exists
         String jsonBody = "[{\"name\":\"username\",\"type\":\"varchar(255)\"}]";
-        coreDBDao.createTableIfNotExist("databus_core", "testtable1", jsonBody);
+        coreDBDao.createTableIfNotExist("databus_core", "tb1", jsonBody);
 
         TestRestTemplate template = new TestRestTemplate();
-        String url = "http://localhost:8888/api/def/databus_core/testtable1";
+        String url = "http://localhost:8888/api/def/databus_core/tb1";
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("x-appkey", "XYZ123");
-        headers.set("x-mac", MACHelper.calculateMAC("XYZ123", "XYZ123_DELETE_/api/def/databus_core/testtable1"));
+        headers.set("x-mac", MACHelper.calculateMAC(
+                "XYZ123", "XYZ123_DELETE_/api/def/databus_core/tb1"));
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<RestResult> resp =
@@ -87,12 +89,14 @@ public class DDLControllerTest {
         TestRestTemplate template = new TestRestTemplate();
         String url = "http://localhost:8888/api/def/databus_core/tb1";
 
-        String body = "[{\"name\":\"name\",\"type\":\"varchar(50)\",\"nullable\":\"false\"}]";
+        String body = "[{\"name\":\"name\",\"type\":\"varchar(50)\",\"nullable\":\"false\",\"unique\":\"true\"}," +
+                "{\"name\":\"age\",\"type\":\"smallint unsigned\"}]";
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("x-appkey", "XYZ123");
         headers.set("Content-Type", "application/json");
-        headers.set("x-mac", MACHelper.calculateMAC("XYZ123", "XYZ123_POST_/api/def/databus_core/tb1"));
+        headers.set("x-mac", MACHelper.calculateMAC(
+                "XYZ123", "XYZ123_POST_/api/def/databus_core/tb1"));
         headers.set("x-ownerid", "1");
 
         HttpEntity<String> entity = new HttpEntity<>(body, headers);
@@ -108,7 +112,7 @@ public class DDLControllerTest {
         assertNotNull(table); // should get 1 back
         assertEquals("tb1", table.getName());
 
-        List<InterfaceInfo> interfaces = sysDBDao.getInterfaceInfoBy("databus_core", "tb1");
+        List<InterfaceInfo> interfaces = sysDBDao.getInterfaceInfoByTable("databus_core", "tb1");
         assertEquals(4, interfaces.size());  // CRUD interfaces should be generated
 
         // clean

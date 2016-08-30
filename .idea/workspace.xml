@@ -3,17 +3,17 @@
   <component name="ChangeListManager">
     <list default="true" id="d51a0368-5af7-4ae4-a66c-f6c8778ed80d" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/AppFilterConfiguration.java" afterPath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/AppFilterConfiguration.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/Application.java" afterPath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/Application.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/AdminController.java" afterPath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/AdminController.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/SimpleController.java" afterPath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/SimpleController.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/dao/AclCacheService.java" afterPath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/dao/AclCacheService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/DDLController.java" afterPath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/DDLController.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/DMLController.java" afterPath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/DMLController.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/dao/CoreDBDao.java" afterPath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/dao/CoreDBDao.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/dao/SysDBDao.java" afterPath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/dao/SysDBDao.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datasource/SysDataSourceConfig.java" afterPath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datasource/SysDataSourceConfig.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datatype/AclInfo.java" afterPath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datatype/AclInfo.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datatype/ClientInfo.java" afterPath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datatype/ClientInfo.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/filter/AdminFilter.java" afterPath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/filter/AdminFilter.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/filter/AuthenticationFilter.java" afterPath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/filter/AuthenticationFilter.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/filter/AuthorityFilter.java" afterPath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/filter/AuthorityFilter.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/com/blueline/databus/core/filter/AuthenticationFilterTest.java" afterPath="$PROJECT_DIR$/src/test/java/com/blueline/databus/core/filter/AuthenticationFilterTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datatype/ColumnInfo.java" afterPath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datatype/ColumnInfo.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/helper/SQLParser.java" afterPath="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/helper/SQLParser.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/com/blueline/databus/core/controller/DDLControllerTest.java" afterPath="$PROJECT_DIR$/src/test/java/com/blueline/databus/core/controller/DDLControllerTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/com/blueline/databus/core/helper/SQLParserTest.java" afterPath="$PROJECT_DIR$/src/test/java/com/blueline/databus/core/helper/SQLParserTest.java" />
     </list>
     <ignored path="databus-core.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -39,51 +39,23 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="SysDBDao.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/dao/SysDBDao.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-2808">
-              <caret line="140" column="5" selection-start-line="140" selection-start-column="5" selection-end-line="140" selection-end-column="5" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="DDLController.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="DDLController.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/DDLController.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="323">
-              <caret line="43" column="44" selection-start-line="43" selection-start-column="44" selection-end-line="43" selection-end-column="44" />
-              <folding />
+            <state relative-caret-position="19">
+              <caret line="99" column="53" selection-start-line="99" selection-start-column="53" selection-end-line="99" selection-end-column="53" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AuthenticationFilter.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/filter/AuthenticationFilter.java">
+      <file leaf-file-name="DMLController.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/DMLController.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="224">
-              <caret line="72" column="63" selection-start-line="72" selection-start-column="63" selection-end-line="72" selection-end-column="63" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="AuthorityFilterTest.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/test/java/com/blueline/databus/core/filter/AuthorityFilterTest.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="532">
-              <caret line="51" column="0" selection-start-line="51" selection-start-column="0" selection-end-line="51" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="AdminController.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/AdminController.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="101">
-              <caret line="166" column="70" selection-start-line="166" selection-start-column="70" selection-end-line="166" selection-end-column="70" />
+            <state relative-caret-position="4085">
+              <caret line="227" column="10" selection-start-line="227" selection-start-column="10" selection-end-line="227" selection-end-column="10" />
               <folding />
             </state>
           </provider>
@@ -92,8 +64,31 @@
       <file leaf-file-name="AclCacheService.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/dao/AclCacheService.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-380">
+            <state relative-caret-position="-437">
               <caret line="85" column="14" selection-start-line="85" selection-start-column="14" selection-end-line="85" selection-end-column="14" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ApiRecordService.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/dao/ApiRecordService.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="458">
+              <caret line="43" column="9" selection-start-line="43" selection-start-column="9" selection-end-line="43" selection-end-column="9" />
+              <folding>
+                <element signature="e#1263#1264#0" expanded="true" />
+                <element signature="e#1353#1354#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AdminController.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/AdminController.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1377">
+              <caret line="367" column="69" selection-start-line="367" selection-start-column="69" selection-end-line="367" selection-end-column="69" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -128,8 +123,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datasource/CoreDBDataSource.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datasource/SysDBConfig.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datasource/CoreDBConfig.java" />
         <option value="$PROJECT_DIR$/src/test/resources/application.yml" />
         <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datatype/SimpleClass.java" />
@@ -144,7 +137,6 @@
         <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datasource/CallRecordingRedisSource.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/helper/RedisHelper.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/blueline/databus/core/helper/RedisSeriviceTest.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/Application.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datasource/AclCacheRedisSource.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datasource/ApiRecordingRedisSource.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datasource/CoreDataSourceConfig.java" />
@@ -153,32 +145,35 @@
         <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/dao/ApiRecordService.java" />
         <option value="$PROJECT_DIR$/src/main/resources/application.yml" />
         <option value="$PROJECT_DIR$/.gitignore" />
-        <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/dao/CoreDBDao.java" />
         <option value="$PROJECT_DIR$/README.md" />
-        <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/DMLController.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/helper/FilterResponseRender.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/blueline/databus/core/filter/AuthorityFilterTest.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/helper/SQLParser.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/blueline/databus/core/controller/DMLControllerTest.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/blueline/databus/core/controller/SysDBChangeTest.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datatype/Tables.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datatype/TableInfo.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datatype/InterfaceInfo.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/DDLController.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/AppFilterConfiguration.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/blueline/databus/core/controller/AdminControllerTest.java" />
-        <option value="$PROJECT_DIR$/src/test/java/com/blueline/databus/core/controller/DDLControllerTest.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/filter/AdminFilter.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/SimpleController.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/filter/AuthorityFilter.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datasource/SysDataSourceConfig.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datatype/AclInfo.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/dao/AclCacheService.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/AdminController.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/filter/AuthenticationFilter.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/blueline/databus/core/filter/AuthenticationFilterTest.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datatype/ClientInfo.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/dao/CoreDBDao.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datatype/ColumnInfo.java" />
+        <option value="$PROJECT_DIR$/src/test/java/com/blueline/databus/core/helper/SQLParserTest.java" />
+        <option value="$PROJECT_DIR$/src/test/java/com/blueline/databus/core/controller/DDLControllerTest.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/Application.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/AppFilterConfiguration.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/dao/SysDBDao.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/helper/SQLParser.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/DMLController.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/AdminController.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/DDLController.java" />
       </list>
     </option>
   </component>
@@ -242,6 +237,9 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
+      <pane id="Scratches" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -468,7 +466,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="datasource" />
+              <option name="myItemId" value="helper" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -534,9 +532,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -546,7 +541,7 @@
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/pom.xml" />
-    <property name="SearchEverywhereHistoryKey" value="acl&#9;FILE&#9;file:///Users/dave/gitlab_repos/databus-core/src/main/java/com/blueline/databus/core/datatype/AclInfo.java&#10;client&#9;FILE&#9;file:///Users/dave/gitlab_repos/databus-core/src/main/java/com/blueline/databus/core/datatype/ClientInfo.java&#10;sys&#9;FILE&#9;file:///Users/dave/gitlab_repos/databus-core/src/main/java/com/blueline/databus/core/dao/SysDBDao.java&#10;DML&#9;FILE&#9;file:///Users/dave/gitlab_repos/databus-core/src/main/java/com/blueline/databus/core/controller/DMLController.java&#10;DDLC&#9;FILE&#9;file:///Users/dave/gitlab_repos/databus-core/src/main/java/com/blueline/databus/core/controller/DDLController.java&#10;clienti&#9;FILE&#9;file:///Users/dave/gitlab_repos/databus-core/src/main/java/com/blueline/databus/core/datatype/ClientInfo.java&#10;ddl&#9;FILE&#9;file:///Users/dave/gitlab_repos/databus-core/src/test/java/com/blueline/databus/core/controller/DDLControllerTest.java&#10;inter&#9;FILE&#9;file:///Users/dave/gitlab_repos/databus-core/src/main/java/com/blueline/databus/core/datatype/InterfaceInfo.java" />
+    <property name="SearchEverywhereHistoryKey" value="col&#9;FILE&#9;file:///Users/dave/gitlab_repos/databus-core/src/main/java/com/blueline/databus/core/datatype/ColumnInfo.java&#10;core&#9;FILE&#9;file:///Users/dave/gitlab_repos/databus-core/src/main/java/com/blueline/databus/core/dao/CoreDBDao.java&#10;acl&#9;FILE&#9;file:///Users/dave/gitlab_repos/databus-core/src/main/java/com/blueline/databus/core/datatype/AclInfo.java&#10;client&#9;FILE&#9;file:///Users/dave/gitlab_repos/databus-core/src/main/java/com/blueline/databus/core/datatype/ClientInfo.java&#10;sys&#9;FILE&#9;file:///Users/dave/gitlab_repos/databus-core/src/main/java/com/blueline/databus/core/dao/SysDBDao.java&#10;DML&#9;FILE&#9;file:///Users/dave/gitlab_repos/databus-core/src/main/java/com/blueline/databus/core/controller/DMLController.java&#10;DDLC&#9;FILE&#9;file:///Users/dave/gitlab_repos/databus-core/src/main/java/com/blueline/databus/core/controller/DDLController.java&#10;clienti&#9;FILE&#9;file:///Users/dave/gitlab_repos/databus-core/src/main/java/com/blueline/databus/core/datatype/ClientInfo.java&#10;ddl&#9;FILE&#9;file:///Users/dave/gitlab_repos/databus-core/src/test/java/com/blueline/databus/core/controller/DDLControllerTest.java&#10;inter&#9;FILE&#9;file:///Users/dave/gitlab_repos/databus-core/src/main/java/com/blueline/databus/core/datatype/InterfaceInfo.java" />
     <property name="FullScreen" value="true" />
   </component>
   <component name="RecentsManager">
@@ -566,20 +561,20 @@
       <recent name="$PROJECT_DIR$/src/test/java" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.com.blueline.databus.core in databus-core">
-    <configuration default="false" name="DMLControllerTest.delete_data_simple" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="JUnit.DDLControllerTest">
+    <configuration default="false" name="SQLParserTest.createTable_parse_more" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
-          <option name="PATTERN" value="com.blueline.databus.core.controller.*" />
+          <option name="PATTERN" value="com.blueline.databus.core.helper.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
       <module name="databus-core" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="PACKAGE_NAME" value="com.blueline.databus.core.controller" />
-      <option name="MAIN_CLASS_NAME" value="com.blueline.databus.core.controller.DMLControllerTest" />
-      <option name="METHOD_NAME" value="delete_data_simple" />
+      <option name="PACKAGE_NAME" value="com.blueline.databus.core.helper" />
+      <option name="MAIN_CLASS_NAME" value="com.blueline.databus.core.helper.SQLParserTest" />
+      <option name="METHOD_NAME" value="createTable_parse_more" />
       <option name="TEST_OBJECT" value="method" />
       <option name="VM_PARAMETERS" value="-ea" />
       <option name="PARAMETERS" />
@@ -593,19 +588,19 @@
       <patterns />
       <method />
     </configuration>
-    <configuration default="false" name="DMLControllerTest.delete_data_start_end" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration default="false" name="SQLParserTest.createTable_parse_with_index" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
-          <option name="PATTERN" value="com.blueline.databus.core.controller.*" />
+          <option name="PATTERN" value="com.blueline.databus.core.helper.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
       <module name="databus-core" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="PACKAGE_NAME" value="com.blueline.databus.core.controller" />
-      <option name="MAIN_CLASS_NAME" value="com.blueline.databus.core.controller.DMLControllerTest" />
-      <option name="METHOD_NAME" value="delete_data_start_end" />
+      <option name="PACKAGE_NAME" value="com.blueline.databus.core.helper" />
+      <option name="MAIN_CLASS_NAME" value="com.blueline.databus.core.helper.SQLParserTest" />
+      <option name="METHOD_NAME" value="createTable_parse_with_index" />
       <option name="TEST_OBJECT" value="method" />
       <option name="VM_PARAMETERS" value="-ea" />
       <option name="PARAMETERS" />
@@ -619,20 +614,46 @@
       <patterns />
       <method />
     </configuration>
-    <configuration default="false" name="DDLControllerTest.can_create_table" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration default="false" name="SQLParserTest.createTable_ignore_id" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
-          <option name="PATTERN" value="com.blueline.databus.core.controller.*" />
+          <option name="PATTERN" value="com.blueline.databus.core.helper.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
       <module name="databus-core" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="PACKAGE_NAME" value="com.blueline.databus.core.controller" />
-      <option name="MAIN_CLASS_NAME" value="com.blueline.databus.core.controller.DDLControllerTest" />
-      <option name="METHOD_NAME" value="can_create_table" />
+      <option name="PACKAGE_NAME" value="com.blueline.databus.core.helper" />
+      <option name="MAIN_CLASS_NAME" value="com.blueline.databus.core.helper.SQLParserTest" />
+      <option name="METHOD_NAME" value="createTable_ignore_id" />
       <option name="TEST_OBJECT" value="method" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <envs />
+      <patterns />
+      <method />
+    </configuration>
+    <configuration default="false" name="SQLParserTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
+        <pattern>
+          <option name="PATTERN" value="com.blueline.databus.core.helper.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <module name="databus-core" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" value="com.blueline.databus.core.helper" />
+      <option name="MAIN_CLASS_NAME" value="com.blueline.databus.core.helper.SQLParserTest" />
+      <option name="METHOD_NAME" />
+      <option name="TEST_OBJECT" value="class" />
       <option name="VM_PARAMETERS" value="-ea" />
       <option name="PARAMETERS" />
       <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
@@ -659,32 +680,6 @@
       <option name="MAIN_CLASS_NAME" value="com.blueline.databus.core.controller.DDLControllerTest" />
       <option name="METHOD_NAME" />
       <option name="TEST_OBJECT" value="class" />
-      <option name="VM_PARAMETERS" value="-ea" />
-      <option name="PARAMETERS" />
-      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <option name="TEST_SEARCH_SCOPE">
-        <value defaultName="singleModule" />
-      </option>
-      <envs />
-      <patterns />
-      <method />
-    </configuration>
-    <configuration default="false" name="com.blueline.databus.core in databus-core" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
-        <pattern>
-          <option name="PATTERN" value="com.blueline.databus.core.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <module name="databus-core" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="PACKAGE_NAME" value="com.blueline.databus.core" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="METHOD_NAME" />
-      <option name="TEST_OBJECT" value="package" />
       <option name="VM_PARAMETERS" value="-ea" />
       <option name="PARAMETERS" />
       <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
@@ -889,19 +884,19 @@
       <method />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="JUnit.DMLControllerTest.delete_data_simple" />
-      <item index="1" class="java.lang.String" itemvalue="JUnit.DMLControllerTest.delete_data_start_end" />
-      <item index="2" class="java.lang.String" itemvalue="JUnit.DDLControllerTest.can_create_table" />
-      <item index="3" class="java.lang.String" itemvalue="JUnit.DDLControllerTest" />
-      <item index="4" class="java.lang.String" itemvalue="JUnit.com.blueline.databus.core in databus-core" />
+      <item index="0" class="java.lang.String" itemvalue="JUnit.SQLParserTest.createTable_parse_more" />
+      <item index="1" class="java.lang.String" itemvalue="JUnit.SQLParserTest.createTable_parse_with_index" />
+      <item index="2" class="java.lang.String" itemvalue="JUnit.SQLParserTest.createTable_ignore_id" />
+      <item index="3" class="java.lang.String" itemvalue="JUnit.SQLParserTest" />
+      <item index="4" class="java.lang.String" itemvalue="JUnit.DDLControllerTest" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="JUnit.com.blueline.databus.core in databus-core" />
-        <item index="1" class="java.lang.String" itemvalue="JUnit.DDLControllerTest" />
-        <item index="2" class="java.lang.String" itemvalue="JUnit.DDLControllerTest.can_create_table" />
-        <item index="3" class="java.lang.String" itemvalue="JUnit.DMLControllerTest.delete_data_start_end" />
-        <item index="4" class="java.lang.String" itemvalue="JUnit.DMLControllerTest.delete_data_simple" />
+        <item index="0" class="java.lang.String" itemvalue="JUnit.DDLControllerTest" />
+        <item index="1" class="java.lang.String" itemvalue="JUnit.SQLParserTest" />
+        <item index="2" class="java.lang.String" itemvalue="JUnit.SQLParserTest.createTable_ignore_id" />
+        <item index="3" class="java.lang.String" itemvalue="JUnit.SQLParserTest.createTable_parse_with_index" />
+        <item index="4" class="java.lang.String" itemvalue="JUnit.SQLParserTest.createTable_parse_more" />
       </list>
     </recent_temporary>
     <configuration name="&lt;template&gt;" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" default="true" selected="false">
@@ -925,23 +920,20 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="DDLControllerTest - 2016.08.24 at 15h 30m 35s.xml">
+    <history-entry file="DDLControllerTest - 2016.08.30 at 13h 38m 18s.xml">
       <configuration name="DDLControllerTest" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="DMLControllerTest_query_data_take_and_order - 2016.08.24 at 09h 50m 38s.xml">
-      <configuration name="DMLControllerTest.query_data_take_and_order" configurationId="JUnit" />
+    <history-entry file="SQLParserTest_createTable_ignore_id - 2016.08.30 at 11h 44m 58s.xml">
+      <configuration name="SQLParserTest.createTable_ignore_id" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="DMLControllerTest_query_data_take_skip_order - 2016.08.24 at 09h 53m 07s.xml">
-      <configuration name="DMLControllerTest.query_data_take_skip_order" configurationId="JUnit" />
+    <history-entry file="SQLParserTest_createTable_parse - 2016.08.30 at 11h 37m 56s.xml">
+      <configuration name="SQLParserTest.createTable_parse" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="DMLControllerTest_query_data_take_skip_order - 2016.08.24 at 09h 53m 32s.xml">
-      <configuration name="DMLControllerTest.query_data_take_skip_order" configurationId="JUnit" />
+    <history-entry file="SQLParserTest_createTable_parse_more - 2016.08.30 at 11h 39m 50s.xml">
+      <configuration name="SQLParserTest.createTable_parse_more" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="DMLControllerTest_query_data_take_skip_order - 2016.08.24 at 09h 56m 21s.xml">
-      <configuration name="DMLControllerTest.query_data_take_skip_order" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="com_blueline_databus_core_in_databus-core - 2016.08.24 at 17h 06m 17s.xml">
-      <configuration name="com.blueline.databus.core in databus-core" configurationId="JUnit" />
+    <history-entry file="SQLParserTest_createTable_parse_with_index - 2016.08.30 at 11h 41m 50s.xml">
+      <configuration name="SQLParserTest.createTable_parse_with_index" configurationId="JUnit" />
     </history-entry>
     <history-entry file="com_blueline_databus_core_in_databus-core - 2016.08.24 at 17h 11m 11s.xml">
       <configuration name="com.blueline.databus.core in databus-core" configurationId="JUnit" />
@@ -953,6 +945,9 @@
       <configuration name="com.blueline.databus.core in databus-core" configurationId="JUnit" />
     </history-entry>
     <history-entry file="com_blueline_databus_core_in_databus-core - 2016.08.29 at 22h 50m 15s.xml">
+      <configuration name="com.blueline.databus.core in databus-core" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="com_blueline_databus_core_in_databus-core - 2016.08.30 at 11h 36m 03s.xml">
       <configuration name="com.blueline.databus.core in databus-core" configurationId="JUnit" />
     </history-entry>
   </component>
@@ -975,10 +970,10 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32891566" sideWeight="0.5" order="10" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32891566" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25662652" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.30963856" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32891566" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25679544" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.23032904" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2746988" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24964234" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
@@ -1002,11 +997,11 @@
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32891566" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25662652" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.30963856" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Coverage" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3297568" sideWeight="0.5" order="5" side_tool="true" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32891566" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25679544" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.23032904" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2746988" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24964234" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -1033,20 +1028,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://$MAVEN_REPOSITORY$/org/springframework/boot/spring-boot/1.4.0.RELEASE/spring-boot-1.4.0.RELEASE.jar!/org/springframework/boot/SpringBootConfiguration.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="190">
-          <caret line="18" column="18" selection-start-line="18" selection-start-column="18" selection-end-line="18" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/org/springframework/boot/spring-boot-autoconfigure/1.4.0.RELEASE/spring-boot-autoconfigure-1.4.0.RELEASE.jar!/org/springframework/boot/autoconfigure/SpringBootApplication.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="100">
-          <caret line="25" column="13" selection-start-line="25" selection-start-column="13" selection-end-line="25" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/helper/TimeHelper.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="304">
@@ -1087,13 +1068,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/Application.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="209">
-          <caret line="18" column="1" selection-start-line="18" selection-start-column="1" selection-end-line="18" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/exception/InternalException.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="19">
@@ -1129,20 +1103,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/dao/ApiRecordService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="570">
-          <caret line="32" column="19" selection-start-line="32" selection-start-column="19" selection-end-line="32" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datatype/ColumnInfo.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-133">
-          <caret line="5" column="13" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="57">
@@ -1151,17 +1111,17 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/README.md">
-      <provider editor-type-id="text-editor">
-        <state relative-caret-position="95">
-          <caret line="5" column="0" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
-        </state>
-      </provider>
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="SPLIT">
           <first_editor relative-caret-position="95">
             <caret line="5" column="0" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
           </first_editor>
           <second_editor />
+        </state>
+      </provider>
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="95">
+          <caret line="5" column="0" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
         </state>
       </provider>
     </entry>
@@ -1186,13 +1146,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/helper/SQLParser.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="950">
-          <caret line="145" column="75" selection-start-line="145" selection-start-column="75" selection-end-line="145" selection-end-column="75" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/test/java/com/blueline/databus/core/controller/SysDBChangeTest.java" />
     <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datatype/TableInfo.java">
       <provider selected="true" editor-type-id="text-editor">
@@ -1205,13 +1158,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="95">
           <caret line="5" column="13" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/dao/CoreDBDao.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="115">
-          <caret line="81" column="18" selection-start-line="81" selection-start-column="18" selection-end-line="81" selection-end-column="18" />
         </state>
       </provider>
     </entry>
@@ -1229,22 +1175,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/com/blueline/databus/core/controller/DDLControllerTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="356">
-          <caret line="102" column="0" selection-start-line="102" selection-start-column="0" selection-end-line="102" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/AppFilterConfiguration.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="38">
-          <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/filter/AdminFilter.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="380">
@@ -1256,13 +1186,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="38">
           <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/DMLController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="684">
-          <caret line="36" column="43" selection-start-line="36" selection-start-column="43" selection-end-line="36" selection-end-column="43" />
         </state>
       </provider>
     </entry>
@@ -1284,9 +1207,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="907">
           <caret line="64" column="110" selection-start-line="64" selection-start-column="110" selection-end-line="64" selection-end-column="110" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1311,27 +1231,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/dao/AclCacheService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-380">
-          <caret line="85" column="14" selection-start-line="85" selection-start-column="14" selection-end-line="85" selection-end-column="14" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/AdminController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="101">
-          <caret line="166" column="70" selection-start-line="166" selection-start-column="70" selection-end-line="166" selection-end-column="70" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/filter/AuthenticationFilter.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="224">
+        <state relative-caret-position="1026">
           <caret line="72" column="63" selection-start-line="72" selection-start-column="63" selection-end-line="72" selection-end-column="63" />
           <folding />
         </state>
@@ -1341,11 +1243,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="950">
           <caret line="62" column="25" selection-start-line="62" selection-start-column="25" selection-end-line="62" selection-end-column="25" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#1235#1236#0" expanded="true" />
-            <element signature="e#1262#1263#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1353,31 +1250,133 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="247">
           <caret line="103" column="0" selection-start-line="103" selection-start-column="0" selection-end-line="103" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/test/java/com/blueline/databus/core/filter/AuthorityFilterTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="532">
+        <state relative-caret-position="665">
           <caret line="51" column="0" selection-start-line="51" selection-start-column="0" selection-end-line="51" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datatype/ColumnInfo.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="608">
+          <caret line="44" column="57" selection-start-line="44" selection-start-column="57" selection-end-line="44" selection-end-column="57" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/com/blueline/databus/core/helper/SQLParserTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3268">
+          <caret line="186" column="0" selection-start-line="186" selection-start-column="0" selection-end-line="186" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/com/blueline/databus/core/controller/DDLControllerTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="627">
+          <caret line="114" column="61" selection-start-line="114" selection-start-column="61" selection-end-line="114" selection-end-column="61" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/Application.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="95">
+          <caret line="10" column="5" selection-start-line="10" selection-start-column="5" selection-end-line="10" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/AppFilterConfiguration.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="304">
+          <caret line="22" column="22" selection-start-line="22" selection-start-column="22" selection-end-line="22" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/datatype/RestResult.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="95">
+          <caret line="7" column="13" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/dao/SysDBDao.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2808">
-          <caret line="140" column="5" selection-start-line="140" selection-start-column="5" selection-end-line="140" selection-end-column="5" />
+        <state relative-caret-position="262">
+          <caret line="165" column="20" selection-start-line="165" selection-start-column="20" selection-end-line="165" selection-end-column="20" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/helper/SQLParser.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="310">
+          <caret line="291" column="52" selection-start-line="283" selection-start-column="7" selection-end-line="291" selection-end-column="52" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/dao/CoreDBDao.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="131" column="48" selection-start-line="131" selection-start-column="48" selection-end-line="131" selection-end-column="48" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/AdminController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1377">
+          <caret line="367" column="69" selection-start-line="367" selection-start-column="69" selection-end-line="367" selection-end-column="69" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/DDLController.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="323">
-          <caret line="43" column="44" selection-start-line="43" selection-start-column="44" selection-end-line="43" selection-end-column="44" />
+        <state relative-caret-position="19">
+          <caret line="99" column="53" selection-start-line="99" selection-start-column="53" selection-end-line="99" selection-end-column="53" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/controller/DMLController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4085">
+          <caret line="227" column="10" selection-start-line="227" selection-start-column="10" selection-end-line="227" selection-end-column="10" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/dao/AclCacheService.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-437">
+          <caret line="85" column="14" selection-start-line="85" selection-start-column="14" selection-end-line="85" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/blueline/databus/core/dao/ApiRecordService.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="458">
+          <caret line="43" column="9" selection-start-line="43" selection-start-column="9" selection-end-line="43" selection-end-column="9" />
+          <folding>
+            <element signature="e#1263#1264#0" expanded="true" />
+            <element signature="e#1353#1354#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

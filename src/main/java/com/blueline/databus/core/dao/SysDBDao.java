@@ -163,7 +163,7 @@ public class SysDBDao {
      * @param name client名
      * @return 受影响行数
      */
-    public int refreshKeys(String name) {
+    public int resetKeys(String name) {
         String newAppKey = RandomStringHelper.getRandomString(10);
         String newSKey = RandomStringHelper.hashKey(newAppKey);
         return this.templateSys.update(
@@ -334,7 +334,7 @@ public class SysDBDao {
      * 获取所有API信息
      * @return InterfaceInfo的列表
      */
-    public List<InterfaceInfo> getInterfaceInfo() {
+    public List<InterfaceInfo> getAllInterfaceInfo() {
         return this.templateSys.query(
                 "SELECT `id`, `table_name`, `db_name`, `api`, `method`, `description` FROM `interfaces`",
                 (ResultSet rs, int rowNum) -> new InterfaceInfo(
@@ -354,7 +354,7 @@ public class SysDBDao {
      * @param tableName 表名
      * @return InterfaceInfo列表
      */
-    public List<InterfaceInfo> getInterfaceInfoBy(String dbName, String tableName) {
+    public List<InterfaceInfo> getInterfaceInfoByTable(String dbName, String tableName) {
         return this.templateSys.query(
                 "SELECT `id`, `table_name`, `db_name`, `api`, `method`, `description` FROM `interfaces` " +
                 "WHERE `table_name` = ? AND `db_name` = ?",

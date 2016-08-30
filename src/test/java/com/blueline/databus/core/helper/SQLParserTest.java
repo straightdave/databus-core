@@ -141,8 +141,52 @@ public class SQLParserTest {
         String jsonBody = "[{\"name\":\"col1\",\"type\":\"int unsigned\",\"nullable\":\"true\"}]";
 
         String result = sqlParser.parseCreateTableSQL("db1", "tb1", jsonBody);
+
         assertFalse("SQL should not be blank", StringUtils.isEmpty(result));
         System.out.println(result);
+    }
+
+    @Test
+    public void createTable_ignore_id() throws InternalException {
+
+        String jsonBody = "[{\"name\":\"id\",\"type\":\"smallint unsigned primary key\"}, " +
+                "{\"name\":\"name\", \"type\":\"varchar(50)\", \"nullable\":\"false\"}]";
+
+        String result = sqlParser.parseCreateTableSQL("db1", "tb1", jsonBody);
+
+        assertFalse("SQL should not be blank", StringUtils.isEmpty(result));
+        System.out.println(result);
+        assertEquals(
+                "CREATE TABLE `db1`.`tb1` (`id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,`name` VARCHAR(50) NOT NULL);",
+                result);
+    }
+
+    @Test
+    public void createTable_parse_with_unique() throws InternalException {
+
+        String jsonBody = "[{\"name\":\"age\",\"type\":\"int unsigned\",\"nullable\":\"true\",\"unique\":\"true\"}]";
+
+        String result = sqlParser.parseCreateTableSQL("db1", "tb1", jsonBody);
+
+        assertFalse("SQL should not be blank", StringUtils.isEmpty(result));
+        System.out.println(result);
+        assertEquals(
+                "CREATE TABLE `db1`.`tb1` (`id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,`age` INT UNSIGNED NULL UNIQUE);",
+                result);
+    }
+
+    @Test
+    public void createTable_parse_with_index() throws InternalException {
+
+        String jsonBody = "[{\"name\":\"age\",\"type\":\"int unsigned\",\"nullable\":\"true\",\"index\":\"true\"}]";
+
+        String result = sqlParser.parseCreateTableSQL("db1", "tb1", jsonBody);
+
+        assertFalse("SQL should not be blank", StringUtils.isEmpty(result));
+        System.out.println(result);
+        assertEquals(
+                "CREATE TABLE `db1`.`tb1` (`id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,`age` INT UNSIGNED NULL,INDEX `index_age`(`age`));",
+                result);
     }
 
     @Test
@@ -156,5 +200,8 @@ public class SQLParserTest {
         String result = sqlParser.parseCreateTableSQL("db1", "tb1", jsonBody);
         assertFalse("SQL should not be blank", StringUtils.isEmpty(result));
         System.out.println(result);
+        assertEquals(
+                "CREATE TABLE `db1`.`tb1` (`id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,`age` INT UNSIGNED NULL,INDEX `index_age`(`age`));",
+                result);
     }
 }

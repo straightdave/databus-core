@@ -116,10 +116,14 @@ public class SQLParser {
 
     /**
      * 分析Query String,将其转化为Delete-SQL语句的条件clause
-     * @param paramMap 从request调用getParamsterMap获取的map
+     * @param paramMap 从request调用getParamsterMap获取的map(为空则返回"WHERE 1=0",确保数据安全)
      * @return sql clauses
      */
     public String parseSQL4Delete(final Map<String, String[]> paramMap) {
+
+        if (paramMap.size() < 1) {
+            return "WHERE 1=0"; // 不附加参数的情况非常危险,这里做不删除处理
+        }
 
         StringBuilder sqlQuery = new StringBuilder("WHERE ");
 
@@ -187,11 +191,15 @@ public class SQLParser {
      * 忽略id列和列信息中没有的列;
      * @param jsonBody ServletRequest的getInputStream()的结果
      *                 造型大概是:
-     *           <code>[
+     *                 <pre>
+     *                 <code>
+     *                 [
      *                     {"name":"dave", "age":"18", "sex":"male"},
      *                     {"name":"mike", "age":"18", "sex":"male", "salary":"20k"},
      *                     ...
-     *                 ]</code>
+     *                 ]
+     *                 </code>
+     *                 </pre>
      *
      * @param columnInfoList 列信息
      * @return sql整句 <code>INSERT INTO `%s`.`%s` (... ) VALUES (...), (...), ...</code>
@@ -315,27 +323,85 @@ public class SQLParser {
         }
     }
 
+    /**
+     * 处理StringBuilder,去除尾部逗号
+     * @param sb 需要修改的StringBuilder实例
+     */
     private void removeLastComma(StringBuilder sb) {
         removeLastComma(sb, "");
     }
 
+    /**
+     * 处理StringBuilder,将尾部逗号替换为其他字符串
+     * @param sb 需要修改的StringBuilder实例
+     * @param replacement 替换字符串
+     */
     private void removeLastComma(StringBuilder sb, String replacement) {
         int index_of_last_comma = sb.lastIndexOf(",");
         sb.replace(index_of_last_comma, index_of_last_comma + 1, replacement);
     }
 
+
+
+    //
+    // --- below ones are for DDL parsing ---
+    //
+
+
+    /**
+     * 解析参数称为创建表的SQL语句
+     * @param dbName 创建表所在的数据库名
+     * @param tableName 要创建的表名
+     * @param jsonBody HTTP请求的请求体,json格式数据。数据格式为json列表:
+     *                 <code>
+     *                     [{"name":"column_name", "type":"column_type_string", "nullable":"true"}, {}, ...]
+     *                 </code>
+     *
+     *                 <ul>
+     *                     <li>
+     *                         每一个json元素代表一个列信息;数据库中,列的顺序就是该列在这个json列表中的顺序;
+     *                     </li>
+     *                     <li>
+     *                         <strong>name</strong>键的值为列名,建议以小写单词和下划线组合方式命名;
+     *                     </li>
+     *                     <li>
+     *                         <strong>type</strong>键的值为列的数据类型字符串,如"INT"或"VARCHAR(n)"(可以参考MySQL列定义语法);
+     *                     </li>
+     *                     <li>
+     *                         <strong>nullable</strong>元素可以省略,但如果存在且值为"true",则不标记该列"NOT NULL";
+     *                     </li>
+     *                     <li>
+     *                         <strong>unique</strong>元素可以省略,但如果存在且值为"true",则标记该列是UNIQUE的;
+     *                         unique元素诶true的情况下,index元素将被忽略;
+     *                     </li>
+     *                     <li>
+     *                         <strong>index</strong>元素可以省略,但如果存在且值为"true",则为该列创建索引,索引名称为`index_{列名}`;
+     *                     </li>
+     *                     <li>
+     *                         列信息中必须包含name和type元素,否则该列信息会被忽略;键名如"name","type"等,都为小写单词;
+     *                     </li>
+     *                 </ul>
+     *
+     *                 <strong>
+     *                     注意:不用提供id列,系统默认会使用
+     *                     <code>`id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY</code>
+     *                     来创建主键。
+     *                     这意味着即使传递一个空json列表,依然会创建一个表(只有默认的id列)。
+     *                 </strong>
+     * @param ifNotExist 是否在SQL中加上"IF NOT EXIST"子句,避免执行时碰到同名表而出现异常
+     * @return 解析成的建表SQL语句
+     * @throws InternalException 内部异常,用于异常信息传递
+     */
     public String parseCreateTableSQL(String dbName, String tableName, String jsonBody, boolean ifNotExist)
             throws InternalException {
 
-        // 转换HTTP body传来的JSON数组,结构出错则报IOException
         ObjectMapper om = new ObjectMapper();
         List<Map<String, String>> rawBody;
         try {
             rawBody = om.readValue(jsonBody, List.class);
         }
         catch (IOException | ClassCastException ex) {
-            System.err.println("fuck cannot wrap request data into json!");
-            throw new InternalException("parse createTable SQL: " + ex.getMessage());
+            throw new InternalException("parse json from request body failed: " + ex.getMessage());
         }
 
         List<ColumnInfo> columnInfoList = new LinkedList<>();
@@ -343,19 +409,22 @@ public class SQLParser {
             if (map.containsKey("name") && map.containsKey("type")) {
                 String colName = map.get("name").toLowerCase();
                 String colType = map.get("type").toUpperCase();
+                boolean isNullable = map.containsKey("nullable") && map.get("nullable").equalsIgnoreCase("true");
+                boolean isUnique = map.containsKey("unique") && map.get("unique").equalsIgnoreCase("true");
+                boolean hasIndex = map.containsKey("index") && map.get("index").equalsIgnoreCase("true");
 
-                boolean isNullable = true;
-                if (map.containsKey("nullable")) {
-                    isNullable = map.get("nullable").equalsIgnoreCase("true");
+                String keys = "";
+                if (isUnique) {
+                    keys = "UNI";
                 }
-
-                columnInfoList.add(new ColumnInfo(colName, colType, isNullable));
+                else if (hasIndex) {
+                    keys = "IND";
+                }
+                columnInfoList.add(new ColumnInfo(colName, colType, isNullable, keys));
             }
         });
 
-
         StringBuilder sb = new StringBuilder();
-
         if (ifNotExist) {
             sb.append("CREATE TABLE IF NOT EXISTS ");
         }
@@ -366,19 +435,43 @@ public class SQLParser {
 
         columnInfoList.stream()
                 .filter(col -> !col.getName().equalsIgnoreCase("id")) // ignore user-provided id column
-                .forEach(col -> {
-                    sb.append(String.format("`%s` %s%s,", col.getName(), col.getColumnType(), col.isNullable()? " NULL" : ""));
-                });
+                .forEachOrdered(
+                        col -> {
+                            sb.append(String.format("`%s` %s %s%s,",
+                                        col.getName(),
+                                        col.getColumnType(),
+                                        col.isNullable()? "NULL" : "NOT NULL",
+                                        col.getColumnKey().equalsIgnoreCase("UNI") ? " UNIQUE" : ""));
+
+                            if (col.getColumnKey().equalsIgnoreCase("IND")) {
+                                sb.append(String.format("INDEX `index_%s`(`%s`),", col.getName(), col.getName()));
+                            }
+                        });
 
         removeLastComma(sb, ");");
         return sb.toString();
     }
 
+    /**
+     * 解析建表SQL方法的重载,为参数IfNotExist提供默认参数:false
+     * @param dbName 建表所在的数据库名
+     * @param tableName 所建表名
+     * @param jsonBody 建表所需的json参数
+     * @return 建表SQL语句
+     * @throws InternalException 内部异常,用以传递信息
+     */
     public String parseCreateTableSQL(String dbName, String tableName, String jsonBody)
             throws InternalException {
         return parseCreateTableSQL(dbName, tableName, jsonBody, false);
     }
 
+    /**
+     * 解析参数构建drop表的SQL语句
+     * @param dbName 数据库名
+     * @param tableName 表名
+     * @param ifExist 是否添加"IF EXISTS"标记
+     * @return drop表的SQL语句
+     */
     public String parseDropTableSQL(String dbName, String tableName, boolean ifExist) {
         if (ifExist) {
             return String.format("DROP TABLE IF EXISTS `%s`.`%s`", dbName, tableName);
@@ -388,6 +481,12 @@ public class SQLParser {
         }
     }
 
+    /**
+     * drop表解析方法的重载,为IfExist提供默认参数"false"
+     * @param dbName 数据库名
+     * @param tableName 表名
+     * @return SQL语句
+     */
     public String parseDropTableSQL(String dbName, String tableName) {
         return parseDropTableSQL(dbName, tableName, false);
     }

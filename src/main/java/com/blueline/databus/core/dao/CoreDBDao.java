@@ -154,6 +154,7 @@ public class CoreDBDao {
 
     /**
      * 获取某表的所有列的名称、类型、位置
+     * <strong>MySQL的实现</strong>
      * dao内部使用,不抛出异常
      * @param dbName 数据库名
      * @param tableName 表名
@@ -161,27 +162,19 @@ public class CoreDBDao {
      */
     private List<ColumnInfo> getColumns(String dbName, String tableName)
             throws InternalException {
-        String sql =
-                "SELECT " +
-                "COLUMN_NAME, DATA_TYPE, ORDINAL_POSITION, IS_NULLABLE, COLUMN_TYPE, COLUMN_KEY " +
-                "FROM information_schema.COLUMNS " +
-                "WHERE table_name = ? AND table_schema = ?";
-
         List<ColumnInfo> result = this.templateCore.query(
-            sql,
-            new Object[]{ tableName, dbName },
-            new RowMapper<ColumnInfo>() {
-                public ColumnInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return new ColumnInfo(
+                "SELECT COLUMN_NAME, DATA_TYPE, ORDINAL_POSITION, IS_NULLABLE, COLUMN_TYPE, COLUMN_KEY " +
+                "FROM information_schema.COLUMNS " +
+                "WHERE table_schema = ? AND table_name = ?",
+                new Object[] {dbName, tableName},
+                (ResultSet rs, int rowNum) -> new ColumnInfo(
                         rs.getString("COLUMN_NAME").toLowerCase(),
-                        rs.getString("DATA_TYPE").toLowerCase(),
+                        rs.getString("DATA_TYPE").toUpperCase(), // column's short data type (no precision or length)
                         rs.getInt("ORDINAL_POSITION"),
                         rs.getBoolean("IS_NULLABLE"),
-                        rs.getString("COLUMN_TYPE"),
-                        rs.getString("COLUMN_KEY")
-                    );
-                }
-            }
+                        rs.getString("COLUMN_TYPE"). toUpperCase(), // full-text of column's data type
+                        rs.getString("COLUMN_KEY").toUpperCase()
+                )
         );
 
         if (result == null || result.size() < 1) {
