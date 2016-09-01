@@ -16,6 +16,22 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `acl`
+--
+
+DROP TABLE IF EXISTS `acl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `acl` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `interface_id` int(10) unsigned NOT NULL,
+  `client_id` int(10) unsigned NOT NULL,
+  `duration` varchar(10) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `clients`
 --
 
@@ -27,28 +43,53 @@ CREATE TABLE `clients` (
   `name` varchar(255) NOT NULL,
   `display_name` varchar(255) DEFAULT NULL,
   `description` text,
+  `status` tinyint(4) DEFAULT '0',
   `appkey` varchar(255) NOT NULL,
   `skey` varchar(255) NOT NULL,
-  `client_type` tinyint(4) DEFAULT '0',
-  `client_category` tinyint(4) DEFAULT '0',
-  `client_device` tinyint(4) DEFAULT '0',
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
+  `client_type` varchar(50) NOT NULL DEFAULT 'web',
+  `client_category` varchar(50) NOT NULL DEFAULT 'internal',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`),
-  KEY `index_appkey` (`appkey`)
+  UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `clients`
+-- Table structure for table `interfaces`
 --
 
-LOCK TABLES `clients` WRITE;
-/*!40000 ALTER TABLE `clients` DISABLE KEYS */;
-INSERT INTO `clients` VALUES (1,'client1',NULL,NULL,'appkey1','skey1',0,0,0,'2016-08-08 16:04:20',NULL);
-/*!40000 ALTER TABLE `clients` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `interfaces`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `interfaces` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `table_name` varchar(255) NOT NULL,
+  `db_name` varchar(255) NOT NULL,
+  `api` varchar(255) NOT NULL,
+  `method` varchar(10) NOT NULL DEFAULT 'GET',
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `tables`
+--
+
+DROP TABLE IF EXISTS `tables`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tables` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `db_name` varchar(255) NOT NULL,
+  `owner_id` int(10) unsigned NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -59,4 +100,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-08-09 11:23:20
+-- Dump completed on 2016-09-01 13:41:36
