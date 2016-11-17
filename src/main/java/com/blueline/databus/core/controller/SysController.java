@@ -4,16 +4,15 @@ import com.blueline.databus.core.dao.AclCacheService;
 import com.blueline.databus.core.dao.ApiRecordService;
 import com.blueline.databus.core.dao.SysDBDao;
 import com.blueline.databus.core.datatype.*;
+import com.blueline.databus.core.helper.SQLParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -77,10 +76,29 @@ public class SysController {
     }
 
     /**
-     * 根据客户端名称获取客户端信息;
-     * <p>
-     *     <strong>Admin Only!</strong>
-     * </p>
+     * 创建客户端
+     * @param jsonBody json格式字典，必须包含若干字段(name),也可包含字段(display_name,description,type,category)
+     * @return RestResult实例，数据部分是新创建的客户端clientInfo(json格式)
+     * @see SysDBDao#createClient(String)
+     */
+    @RequestMapping(value = "/clients", method = POST)
+    public RestResult createClient(@RequestBody String jsonBody) {
+        try {
+            if (!request.getHeader("x-appkey").equalsIgnoreCase(adminAppKey)) {
+                return new RestResult(ResultType.FAIL, "admin only");
+            }
+
+            ClientInfo newClient = sysDBDao.createClient(jsonBody);
+            return new RestResult(ResultType.OK, om.writeValueAsString(newClient));
+        }
+        catch (Exception ex) {
+            logger.fatal(ex.getMessage());
+            return new RestResult(ResultType.ERROR, ex.getMessage());
+        }
+    }
+
+    /**
+     * 根据客户端名称获取客户端信息
      *
      * <pre>
      *     <code>GET /api/sys/client/{name}</code>
@@ -93,10 +111,6 @@ public class SysController {
     @RequestMapping(value = "/client/{name}", method = GET)
     public RestResult getClientByName(@PathVariable(value = "name") String name) {
         try {
-            if (!request.getHeader("x-appkey").equalsIgnoreCase(adminAppKey)) {
-                return new RestResult(ResultType.FAIL, "admin only");
-            }
-
             ClientInfo client = sysDBDao.getClientByName(name);
             if (client != null) {
                 return new RestResult(ResultType.OK, om.writeValueAsString(client));
@@ -104,6 +118,62 @@ public class SysController {
             else {
                 return new RestResult(ResultType.FAIL, String.format("got no client with name {%s}", name));
             }
+        }
+        catch (Exception ex) {
+            logger.fatal(ex.getMessage());
+            return new RestResult(ResultType.ERROR, ex.getMessage());
+        }
+    }
+
+    /**
+     * 根据客户端id获取客户端信息;
+     * <p>
+     *     <strong>Admin Only!</strong>
+     * </p>
+     *
+     * <pre>
+     *     <code>GET /api/sys/client/id_{id}</code>
+     * </pre>
+     *
+     * @param id 客户端Id(不变、唯一)
+     * @return ClientInfo实例
+     * @see ClientInfo
+     */
+    @RequestMapping(value = "/client/id_{id}", method = GET)
+    public RestResult getClientById(@PathVariable(value = "id") String id) {
+        try {
+            if (!request.getHeader("x-appkey").equalsIgnoreCase(adminAppKey)) {
+                return new RestResult(ResultType.FAIL, "admin only");
+            }
+
+            ClientInfo client = sysDBDao.getClientByID(Integer.valueOf(id));
+            if (client != null) {
+                return new RestResult(ResultType.OK, om.writeValueAsString(client));
+            }
+            else {
+                return new RestResult(ResultType.FAIL, String.format("got no client with Id {%s}", id));
+            }
+        }
+        catch (Exception ex) {
+            logger.fatal(ex.getMessage());
+            return new RestResult(ResultType.ERROR, ex.getMessage());
+        }
+    }
+
+    /**
+     * 返回客户端所拥有的所有的表的信息
+     * @param clientName 客户端名称
+     * @return RestResult的message字段中是json格式的表信息的列表
+     */
+    @RequestMapping(value = "/client/{name}/tables", method = GET)
+    public RestResult getTablesByClient(@PathVariable(value = "name") String clientName) {
+        try {
+            if (!request.getHeader("x-appkey").equalsIgnoreCase(adminAppKey)) {
+                return new RestResult(ResultType.FAIL, "admin only");
+            }
+
+            List<TableInfo> result = sysDBDao.getTablesByClient(clientName);
+            return new RestResult(ResultType.OK, om.writeValueAsString(result));
         }
         catch (Exception ex) {
             logger.fatal(ex.getMessage());
@@ -160,7 +230,7 @@ public class SysController {
      * </pre>
      *
      * @param name 客户端名称
-     * @return 操作结果信息字符串
+     * @return 操作结果以及最新的clientInfo实例
      * @see SysDBDao#resetKeys(String)
      * @see ClientInfo
      */
@@ -175,10 +245,11 @@ public class SysController {
 
             int count = sysDBDao.resetKeys(name);
             if (count == 1) {
-                return new RestResult(ResultType.OK, String.format("user {%s} keys reset", name));
+                ClientInfo c = sysDBDao.getClientByName(name);
+                return new RestResult(ResultType.OK, c.toString());
             }
             else {
-                return new RestResult(ResultType.FAIL, String.format("%s rows affected", count));
+                return new RestResult(ResultType.FAIL, String.format("%s rows (should be 1) affected", count));
             }
         }
         catch (Exception ex) {
@@ -199,6 +270,10 @@ public class SysController {
     @RequestMapping(value = "/tables", method = GET)
     public RestResult getAllTables() {
         try {
+            if (!request.getHeader("x-appkey").equalsIgnoreCase(adminAppKey)) {
+                return new RestResult(ResultType.FAIL, "admin only");
+            }
+
             List<TableInfo> tables = sysDBDao.getTableInfo();
             return new RestResult(ResultType.OK, om.writeValueAsString(tables));
         }
@@ -226,7 +301,14 @@ public class SysController {
     ) {
         try {
             TableInfo table = sysDBDao.getTableInfoBy(dbName, tableName);
-            return new RestResult(ResultType.OK, om.writeValueAsString(table));
+            ClientInfo client = sysDBDao.getClientByID(table.getOwnerId());
+            client.hideKeys();
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("table", table);
+            result.put("owner", client);
+
+            return new RestResult(ResultType.OK, om.writeValueAsString(result));
         }
         catch (Exception ex) {
             logger.fatal(ex.getMessage());
@@ -276,6 +358,10 @@ public class SysController {
     public RestResult getInterfaceById(
             @PathVariable("id") int id
     ) {
+        if (!request.getHeader("x-appkey").equalsIgnoreCase(adminAppKey)) {
+            return new RestResult(ResultType.FAIL, "admin only");
+        }
+
         try {
             InterfaceInfo api = sysDBDao.getInterfaceInfoById(id);
             return new RestResult(ResultType.OK, om.writeValueAsString(api));
@@ -300,6 +386,10 @@ public class SysController {
     public RestResult getInterfaceAclById(
             @PathVariable("id") int id
     ) {
+        if (!request.getHeader("x-appkey").equalsIgnoreCase(adminAppKey)) {
+            return new RestResult(ResultType.FAIL, "admin only");
+        }
+
         try {
             List<AclInfo> aclList = sysDBDao.getAclInfoByInterface(id);
             return new RestResult(ResultType.OK, om.writeValueAsString(aclList));
@@ -340,14 +430,16 @@ public class SysController {
             @PathVariable("clientName") String clientName,
             @RequestParam(name = "duration", required = false, defaultValue = "0") String duration
     ) {
+        System.out.println("client name => " + clientName);
+
         try {
             String appkey = request.getHeader("x-appkey");
             if (!appkey.equalsIgnoreCase(adminAppKey))
                 if (!sysDBDao.isInterfaceOwner(appkey, id))
                     return new RestResult(ResultType.FAIL, "admin or interface owner only");
-
             sysDBDao.grantInterfaceToClient(id, clientName, duration);
-            return new RestResult(ResultType.OK, "granted");
+            return new RestResult(ResultType.OK, String.format(
+                    "granted interface{%s} to client{%s} with duration{%s}",id, clientName, duration));
         }
         catch (Exception ex) {
             logger.fatal(ex.getMessage());
@@ -387,7 +479,7 @@ public class SysController {
             InterfaceInfo interfaceInfo = sysDBDao.getInterfaceInfoById(id);
             String cacheKey = String.format("%s %s", interfaceInfo.getMethod().toUpperCase(), interfaceInfo.getApi());
             aclCacheService.removeOneAcl(cacheKey, clientInfo.getAppKey());
-            return new RestResult(ResultType.OK, "acl revoked");
+            return new RestResult(ResultType.OK, String.format("revoked interface{%s} from client{%s}", id, clientName));
         }
         catch (Exception ex) {
             logger.fatal(ex.getMessage());

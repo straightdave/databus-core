@@ -237,7 +237,7 @@ public class DMLController {
      */
     @RequestMapping(value = "/{dbName}/{tableName}/{colName}/{colValue}", method = PUT)
     public RestResult updateData(
-        @PathVariable(value = "dbName")    String dbName,
+        @PathVariable("dbName")    String dbName,
         @PathVariable("tableName") String tableName,
         @PathVariable("colName")   String colName,
         @PathVariable("colValue")  String colValue,

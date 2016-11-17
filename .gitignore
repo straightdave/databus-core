@@ -4,3 +4,4 @@
 /log/
 dump.rdb
 .DS_store
+.idea/*

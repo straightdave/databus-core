@@ -27,8 +27,9 @@ CREATE TABLE `acl` (
   `interface_id` int(10) unsigned NOT NULL,
   `client_id` int(10) unsigned NOT NULL,
   `duration` varchar(10) NOT NULL DEFAULT '0',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -43,15 +44,17 @@ CREATE TABLE `clients` (
   `name` varchar(255) NOT NULL,
   `display_name` varchar(255) DEFAULT NULL,
   `description` text,
-  `status` tinyint(4) DEFAULT '0',
-  `appkey` varchar(255) NOT NULL,
-  `skey` varchar(255) NOT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '0',
+  `appkey` varchar(255) DEFAULT NULL,
+  `skey` varchar(255) DEFAULT NULL,
   `client_type` varchar(50) NOT NULL DEFAULT 'web',
   `client_category` varchar(50) NOT NULL DEFAULT 'internal',
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `vendor_name` varchar(255) DEFAULT NULL,
+  `vendor_ext` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -68,9 +71,9 @@ CREATE TABLE `interfaces` (
   `api` varchar(255) NOT NULL,
   `method` varchar(10) NOT NULL DEFAULT 'GET',
   `description` varchar(255) DEFAULT NULL,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `created_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -85,10 +88,11 @@ CREATE TABLE `tables` (
   `name` varchar(255) NOT NULL,
   `db_name` varchar(255) NOT NULL,
   `owner_id` int(10) unsigned NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -100,4 +104,4 @@ CREATE TABLE `tables` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-09-01 13:41:36
+-- Dump completed on 2016-09-22 11:13:25

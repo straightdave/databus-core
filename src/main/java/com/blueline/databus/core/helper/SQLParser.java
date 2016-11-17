@@ -1,8 +1,10 @@
 package com.blueline.databus.core.helper;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.*;
 
+import com.blueline.databus.core.datatype.ClientInfo;
 import com.blueline.databus.core.datatype.ColumnInfo;
 import com.blueline.databus.core.exception.InternalException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -81,7 +83,7 @@ public class SQLParser {
                         sqlQuery.append("1=1) AND ");
                     }
                     else if (v.length == 1) {
-                        sqlQuery.append(String.format("`%s`='%s' AND ", columnName, v[0]));
+                        sqlQuery.append(String.format("`%s`<>'%s' AND ", columnName, v[0]));
                     }
                 }
 
@@ -157,7 +159,7 @@ public class SQLParser {
                             sqlQuery.append("1=1) AND ");
                         }
                         else if (v.length == 1) {
-                            sqlQuery.append(String.format("`%s`='%s' AND ", columnName, v[0]));
+                            sqlQuery.append(String.format("`%s`<>'%s' AND ", columnName, v[0]));
                         }
                     }
 
@@ -354,10 +356,18 @@ public class SQLParser {
      * 解析参数称为创建表的SQL语句
      * @param dbName 创建表所在的数据库名
      * @param tableName 要创建的表名
-     * @param jsonBody HTTP请求的请求体,json格式数据。数据格式为json列表:
+     * @param columns HTTP请求的请求体,json格式数据。数据格式为json列表:
      * <pre>
      *      <code>
-     *           [{"name":"column_name", "type":"column_type_string", "nullable":"true"}, {}, ...]
+     *           [{
+     *                "name"        : "column_name",
+     *                "data_type"   : "varchar",
+     *                "data_length" : "255",
+     *                "nullable"    : true,
+     *                "unique"      : true,
+     *                "index"       : true
+     *            },
+     *            {}, ...]
      *      </code>
      * </pre>
      *
@@ -369,57 +379,60 @@ public class SQLParser {
      *         <strong>name</strong>键的值为列名,建议以小写单词和下划线组合方式命名;
      *     </li>
      *     <li>
-     *         <strong>type</strong>键的值为列的数据类型字符串,如"INT"或"VARCHAR(n)"(可以参考MySQL列定义语法);
+     *         <strong>data_type</strong>键的值为列的数据类型字符串,
+     *         如"INT", "int unsigned", "smallint"或"VARCHAR"等(可以参考MySQL列定义语法);
      *     </li>
      *     <li>
-     *         <strong>nullable</strong>元素可以省略,但如果存在且值为"true",则不标记该列"NOT NULL";
+     *         <strong>data_length</strong>键的值为列的数据长度字符串,
+     *         如"50"或"255"(可以参考MySQL列定义语法);如果没有指明，且数据类型是"char"或"varchar"，则默认255
      *     </li>
      *     <li>
-     *         <strong>unique</strong>元素可以省略,但如果存在且值为"true",则标记该列是UNIQUE的;
-     *         unique元素诶true的情况下,index元素将被忽略;
+     *         <strong>nullable</strong>元素可以省略,但如果存在且值为true(boolean),则不标记该列"NOT NULL";
      *     </li>
      *     <li>
-     *         <strong>index</strong>元素可以省略,但如果存在且值为"true",则为该列创建索引,索引名称为`index_{列名}`;
+     *         <strong>unique</strong>元素可以省略,但如果存在且值为true,则标记该列是UNIQUE的;
+     *         unique元素true的情况下,index元素将被忽略;
      *     </li>
      *     <li>
-     *         列信息中必须包含name和type元素,否则该列信息会被忽略;键名如"name","type"等,都为小写单词;
+     *         <strong>index</strong>元素可以省略,但如果存在且值为true,则为该列创建索引,
+     *         索引名称为`index_{列名}`;
      *     </li>
      * </ul>
-     *
      * <p>
-     *    <strong>注意:</strong> 不用提供id列,系统默认会使用:
+     *     <strong>注意：</strong>
+     *     <ul>
+     *     <li>列信息中必须包含name和data_type元素,否则该列信息会被忽略;</li>
+     *     <li>键名如"name","data_type"等,都为小写单词;</li>
+     *     <li>如果忽略"data_length"字段，则系统会在需要长度的类型加上默认值,
+     *     如"varchar"的默认值为255；而"int"等则不强制要求长度，即使指明，也将忽略而使用系统的默认长度。</li>
+     *     </ul>
+     * </p>
+     * <p>
+     *    <strong>注意:</strong> 不用提供"id"列,系统默认会使用:
      * </p>
      * <pre>
      *     <code>`id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY</code>
      * </pre>
      * <p>
-     *     来创建主键。这意味着即使传递一个空json列表,依然会创建一个表(只有默认的id列)
+     *     来创建主键列。这意味着即使传递一个空json列表,依然会创建一个表(只有默认的id列)
      * </p>
      *
      * @param ifNotExist 是否在SQL中加上"IF NOT EXIST"子句,避免执行时碰到同名表而出现异常
      * @return 解析成的建表SQL语句
      * @throws InternalException 内部异常,用于异常信息传递
      */
-    public String parseCreateTableSQL(String dbName, String tableName, String jsonBody, boolean ifNotExist)
+    public String parseCreateTableSQL(String dbName, String tableName, ArrayList<Map<String, Object>> columns, boolean ifNotExist)
             throws InternalException {
 
-        ObjectMapper om = new ObjectMapper();
-        List<Map<String, String>> rawBody;
-        try {
-            rawBody = om.readValue(jsonBody, List.class);
-        }
-        catch (IOException | ClassCastException ex) {
-            throw new InternalException("parse json from request body failed: " + ex.getMessage());
-        }
-
         List<ColumnInfo> columnInfoList = new LinkedList<>();
-        rawBody.forEach(map -> {
-            if (map.containsKey("name") && map.containsKey("type")) {
-                String colName = map.get("name").toLowerCase();
-                String colType = map.get("type").toUpperCase();
-                boolean isNullable = map.containsKey("nullable") && map.get("nullable").equalsIgnoreCase("true");
-                boolean isUnique = map.containsKey("unique") && map.get("unique").equalsIgnoreCase("true");
-                boolean hasIndex = map.containsKey("index") && map.get("index").equalsIgnoreCase("true");
+        columns.forEach(map -> {
+            if (map.containsKey("name") && map.containsKey("data_type")) {
+                String colName = map.get("name").toString().toLowerCase();
+                String colType = map.get("data_type").toString().toUpperCase();
+                boolean isNullable = map.containsKey("nullable") && (boolean)map.get("nullable");
+                boolean isUnique = map.containsKey("unique") && (boolean)map.get("unique");
+                boolean hasIndex = map.containsKey("index") && (boolean)map.get("index");
+                String comment = map.containsKey("comment") ? map.get("comment").toString() : "";
 
                 String keys = "";
                 if (isUnique) {
@@ -428,7 +441,18 @@ public class SQLParser {
                 else if (hasIndex) {
                     keys = "IND";
                 }
-                columnInfoList.add(new ColumnInfo(colName, colType, isNullable, keys));
+
+                // if not specified the length
+                int col_length = 0; // 0 means to use default length
+                if (!map.keySet().contains("data_length")) {
+                    if (colType.contains("CHAR")) {
+                        col_length = 255;
+                    }
+                }
+                else {
+                    col_length = Integer.valueOf(map.get("data_length").toString());
+                }
+                columnInfoList.add(new ColumnInfo(colName, colType, col_length, comment, isNullable, keys));
             }
         });
 
@@ -445,11 +469,23 @@ public class SQLParser {
                 .filter(col -> !col.getName().equalsIgnoreCase("id")) // ignore user-provided id column
                 .forEachOrdered(
                         col -> {
-                            sb.append(String.format("`%s` %s %s%s,",
+                            if (col.getDataType().contains("CHAR")) {
+                                sb.append(String.format("`%s` %s(%s) %s%s%s,",
                                         col.getName(),
-                                        col.getColumnType(),
+                                        col.getDataType(),
+                                        col.getDataLength(),
                                         col.isNullable()? "NULL" : "NOT NULL",
-                                        col.getColumnKey().equalsIgnoreCase("UNI") ? " UNIQUE" : ""));
+                                        col.getColumnKey().equalsIgnoreCase("UNI") ? " UNIQUE" : "",
+                                        col.getComment().isEmpty() ? "" : " COMMENT '" + col.getComment() + "'"));
+                            }
+                            else {
+                                sb.append(String.format("`%s` %s %s%s%s,",
+                                        col.getName(),
+                                        col.getDataType(),
+                                        col.isNullable() ? "NULL" : "NOT NULL",
+                                        col.getColumnKey().equalsIgnoreCase("UNI") ? " UNIQUE" : "",
+                                        col.getComment().isEmpty() ? "" : " COMMENT '" + col.getComment() + "'"));
+                            }
 
                             if (col.getColumnKey().equalsIgnoreCase("IND")) {
                                 sb.append(String.format("INDEX `index_%s`(`%s`),", col.getName(), col.getName()));
@@ -464,13 +500,13 @@ public class SQLParser {
      * 解析建表SQL方法的重载,为参数IfNotExist提供默认参数:false
      * @param dbName 建表所在的数据库名
      * @param tableName 所建表名
-     * @param jsonBody 建表所需的json参数
+     * @param columns 解析自json格式数据，列信息
      * @return 建表SQL语句
      * @throws InternalException 内部异常,用以传递信息
      */
-    public String parseCreateTableSQL(String dbName, String tableName, String jsonBody)
+    public String parseCreateTableSQL(String dbName, String tableName, ArrayList<Map<String, Object>> columns)
             throws InternalException {
-        return parseCreateTableSQL(dbName, tableName, jsonBody, false);
+        return parseCreateTableSQL(dbName, tableName, columns, false);
     }
 
     /**

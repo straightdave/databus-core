@@ -12,6 +12,7 @@ import java.io.IOException;
  * <ul>
  *     <li><strong>Access-Control-Allow-Methods</strong>: GET,POST,DELETE,PUT,HEAD</li>
  *     <li><strong>Access-Control-Allow-Origin</strong>: *</li>
+ *     <li><strong>Access-Control-Allow-Headers</strong>: x-mac,x-appkey</li>
  *     <li><strong>Access-Control-Max-Age</strong>: 3600</li>
  * </ul>
  */
@@ -23,6 +24,7 @@ public class CorsFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) resp;
         response.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,PUT,HEAD");
         response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Headers", "x-mac,x-appkey");
         response.setHeader("Access-Control-Max-Age", "3600");
         chain.doFilter(req, resp);
     }

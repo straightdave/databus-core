@@ -146,7 +146,12 @@ public class AclCacheService {
     /**
      * 清除本缓存中的所有数据
      */
-    private void flushDB() {
-        this.redisTemplate4Acl.getConnectionFactory().getConnection().flushDb();
+    public void flushDB() {
+        try {
+            this.redisTemplate4Acl.getConnectionFactory().getConnection().flushDb();
+        }
+        catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 }

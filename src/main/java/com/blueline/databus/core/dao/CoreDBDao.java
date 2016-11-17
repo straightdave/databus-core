@@ -8,11 +8,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 
 @Repository
@@ -29,15 +27,16 @@ public class CoreDBDao {
      * 创建表
      * @param dbName 数据库名
      * @param tableName 表名
-     * @param jsonBody json参数
+     * @param columns 解析自json格式参数，元素为列信息
      * @throws InternalException 内部异常
      */
-    public void createTable(String dbName, String tableName, String jsonBody)
+    public void createTable(String dbName, String tableName, ArrayList<Map<String, Object>> columns)
             throws InternalException {
-        String sql = "<null>";
+        String sql = "";
         try {
-            sql = sqlParser.parseCreateTableSQL(dbName, tableName, jsonBody);
+            sql = sqlParser.parseCreateTableSQL(dbName, tableName, columns);
             logger.debug("createTable:拼凑的SQL语句为: " + sql);
+            System.out.println("sql => " + sql);
             this.templateCore.execute(sql);
         }
         catch (Exception ex) {
@@ -49,14 +48,14 @@ public class CoreDBDao {
      * 创建表(如果表已存在不会抛出异常,主要用于测试目的)
      * @param dbName 数据库名
      * @param tableName 表名
-     * @param jsonBody json参数
+     * @param columns ArrayList<HashMap> 解析自json格式参数，元素为列信息
      * @throws InternalException 内部异常
      */
-    public void createTableIfNotExist(String dbName, String tableName, String jsonBody)
+    public void createTableIfNotExist(String dbName, String tableName, ArrayList<Map<String, Object>> columns)
             throws InternalException {
         String sql = "<null>";
         try {
-            sql = sqlParser.parseCreateTableSQL(dbName, tableName, jsonBody, true);
+            sql = sqlParser.parseCreateTableSQL(dbName, tableName, columns, true);
             logger.debug("createTable:拼凑的SQL语句为: " + sql);
             this.templateCore.execute(sql);
         }
@@ -107,6 +106,15 @@ public class CoreDBDao {
         logger.debug("queryData:拼凑的SQL语句为: " + sql);
 
         List<Map<String, Object>> result = this.templateCore.queryForList(sql);
+        if (result.size() < 1) {
+            // build bare json structure and return
+            List<ColumnInfo> cols = getColumns(dbName, tableName);
+
+            Map<String, Object> innerMap = new HashMap<>();
+            cols.forEach(col -> innerMap.put(col.getName(), "") );
+            result.add(innerMap);
+        }
+
         ObjectMapper om = new ObjectMapper();
         return om.writeValueAsString(result);
     }
@@ -171,17 +179,19 @@ public class CoreDBDao {
      * @param tableName 表名
      * @return 列信息对象的列表
      */
-    private List<ColumnInfo> getColumns(String dbName, String tableName)
+    public List<ColumnInfo> getColumns(String dbName, String tableName)
             throws InternalException {
         List<ColumnInfo> result = this.templateCore.query(
-                "SELECT COLUMN_NAME, DATA_TYPE, ORDINAL_POSITION, IS_NULLABLE, COLUMN_TYPE, COLUMN_KEY " +
+                "SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, ORDINAL_POSITION, COLUMN_COMMENT, IS_NULLABLE, COLUMN_TYPE, COLUMN_KEY " +
                 "FROM information_schema.COLUMNS " +
                 "WHERE table_schema = ? AND table_name = ?",
                 new Object[] {dbName, tableName},
                 (ResultSet rs, int rowNum) -> new ColumnInfo(
                         rs.getString("COLUMN_NAME").toLowerCase(),
                         rs.getString("DATA_TYPE").toUpperCase(), // column's short data type (no precision or length)
+                        rs.getInt("CHARACTER_MAXIMUM_LENGTH"),
                         rs.getInt("ORDINAL_POSITION"),
+                        rs.getString("COLUMN_COMMENT"),
                         rs.getBoolean("IS_NULLABLE"),
                         rs.getString("COLUMN_TYPE"). toUpperCase(), // full-text of column's data type
                         rs.getString("COLUMN_KEY").toUpperCase()

@@ -25,12 +25,10 @@ public class ApiRecordService {
      */
     public void recordAPICall(String apiKey) {
         try {
-            System.out.println("going to record " + apiKey);
             this.redisTemplate4Record.opsForValue().increment(apiKey, 1);
         }
         catch (Exception ex) {
             // eat it
-            System.err.println("==> Recording Api Call: " + ex.getMessage());
         }
     }
 
@@ -45,7 +43,6 @@ public class ApiRecordService {
         }
         catch (Exception ex) {
             // eat it
-            System.err.println("==> Get Api Call: " + ex.getMessage());
             return -1;
         }
     }
@@ -56,9 +53,14 @@ public class ApiRecordService {
      */
     public Map<String, Integer> dumpAllCallRecord() {
         Map<String, Integer> result = new HashMap<>();
-        this.redisTemplate4Record.keys("*").forEach(key -> {
-            result.put(key, Integer.valueOf(this.redisTemplate4Record.opsForValue().get(key)));
-        });
+        try {
+            this.redisTemplate4Record.keys("*").forEach(key ->
+                result.put(key, Integer.valueOf(this.redisTemplate4Record.opsForValue().get(key)))
+            );
+        }
+        catch (Exception ex) {
+            // eat it
+        }
         return result;
     }
 

@@ -76,7 +76,14 @@ public class AuthorityFilter implements Filter {
                 return;
             }
 
-            // firstly use this app key to check cache
+            // bypass APIs not in black list
+            // now only DDL and DML APIs are protected
+            if (!api.startsWith("/api/def") && !api.startsWith("/api/data")) {
+                chain.doFilter(req, resp);
+                return;
+            }
+
+            // first use this app key to check cache
             int redisCheckState = aclCacheService.checkAccess(api, method, appKey);
             if (redisCheckState == 1) {
                 // acl exists in cache, good

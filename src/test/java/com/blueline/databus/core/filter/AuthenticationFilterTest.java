@@ -1,6 +1,7 @@
 package com.blueline.databus.core.filter;
 
 import com.blueline.databus.core.dao.SysDBDao;
+import com.blueline.databus.core.exception.InternalException;
 import com.blueline.databus.core.helper.MACHelper;
 import com.blueline.databus.core.datatype.RestResult;
 import com.blueline.databus.core.datatype.ResultType;
@@ -97,20 +98,26 @@ public class AuthenticationFilterTest {
     }
 
     @Test
-    public void get_skey_from_db_right() {
+    public void get_skey_from_db_right() throws InternalException {
         assertNotNull("SysDBDao could be autowired", sysDBDao);
 
-        // 测试数据中有记录,其appkey是appkey1, skey为skey1
+        // clean and create test client
+        sysDBDao.deleteClient("test_client");
+        sysDBDao.createClient("{\"name\":\"test_client\"}");
 
-        String skey = sysDBDao.getClientByAppKey("appkey1").getSKey();
+        String appkey = sysDBDao.getClientByName("test_client").getAppKey();
+        assertNotNull(appkey);
+        assertNotEquals("", appkey);
 
-        assertTrue(skey.equals("skey1"));
+        String skey = sysDBDao.getClientByName("test_client").getSKey();
+        assertNotNull(skey);
+        assertNotEquals("", skey);
 
-        String dummyApi = "http://localhost:8888/api/data/databus_core/table1?id=1";
-        String reqMac = MACHelper.calculateMAC(skey, skey + "_GET_/api/data/databus_core/table1?id=1");
+        String dummyApi = "http://localhost:8888/api/sys/client/test_client";
+        String reqMac = MACHelper.calculateMAC(skey, appkey + "_GET_/api/sys/client/test_client");
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("x-appkey", "appkey1");
+        headers.add("x-appkey", appkey);
         headers.add("x-mac", reqMac);
 
         ResponseEntity<RestResult> resp = restTemplate.exchange(
@@ -118,7 +125,9 @@ public class AuthenticationFilterTest {
 
         System.out.println(resp.getBody());
 
-        assertEquals(ResultType.FAIL, resp.getBody().getResultType());
-        assertTrue(resp.getBody().getMessage().contains("MAC not match"));
+        assertEquals(ResultType.OK, resp.getBody().getResultType());
+
+        // clean
+        sysDBDao.deleteClient("test_client");
     }
 }

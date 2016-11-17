@@ -10,11 +10,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StringUtils;
 import static org.junit.Assert.*;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 // 因为底层涉及到取配置项的值,因此需要连SpringBoot一起run: @RunWith和@SpringBootTest
 @RunWith(SpringRunner.class)
@@ -138,9 +134,24 @@ public class SQLParserTest {
     @Test
     public void createTable_parse() throws InternalException {
 
-        String jsonBody = "[{\"name\":\"col1\",\"type\":\"int unsigned\",\"nullable\":\"true\"}]";
+        ArrayList<Map<String,Object>> list = new ArrayList<>();
+        Map<String,Object> col1 = new HashMap<>();
+        col1.put("name", "name");
+        col1.put("data_type", "varchar");
 
-        String result = sqlParser.parseCreateTableSQL("db1", "tb1", jsonBody);
+        Map<String,Object> col2 = new HashMap<>();
+        col2.put("name", "age");
+        col2.put("data_type", "smallint unsigned");
+
+        Map<String,Object> col3 = new HashMap<>();
+        col3.put("name", "born_at");
+        col3.put("data_type", "datetime");
+
+        list.add(col1);
+        list.add(col2);
+        list.add(col3);
+
+        String result = sqlParser.parseCreateTableSQL("db1", "tb1", list);
 
         assertFalse("SQL should not be blank", StringUtils.isEmpty(result));
         System.out.println(result);
@@ -149,10 +160,20 @@ public class SQLParserTest {
     @Test
     public void createTable_ignore_id() throws InternalException {
 
-        String jsonBody = "[{\"name\":\"id\",\"type\":\"smallint unsigned primary key\"}, " +
-                "{\"name\":\"name\", \"type\":\"varchar(50)\", \"nullable\":\"false\"}]";
+        ArrayList<Map<String,Object>> list = new ArrayList<>();
+        Map<String,Object> col1 = new HashMap<>();
+        col1.put("name", "id");
+        col1.put("data_type", "int");
 
-        String result = sqlParser.parseCreateTableSQL("db1", "tb1", jsonBody);
+        Map<String,Object> col2 = new HashMap<>();
+        col2.put("name", "name");
+        col2.put("data_type", "varchar");
+        col2.put("data_length", "50");
+
+        list.add(col1);
+        list.add(col2);
+
+        String result = sqlParser.parseCreateTableSQL("db1", "tb1", list);
 
         assertFalse("SQL should not be blank", StringUtils.isEmpty(result));
         System.out.println(result);
@@ -162,11 +183,17 @@ public class SQLParserTest {
     }
 
     @Test
-    public void createTable_parse_with_unique() throws InternalException {
+    public void createTable_parse_with_unique_nullable() throws InternalException {
 
-        String jsonBody = "[{\"name\":\"age\",\"type\":\"int unsigned\",\"nullable\":\"true\",\"unique\":\"true\"}]";
+        ArrayList<Map<String,Object>> list = new ArrayList<>();
+        Map<String,Object> col1 = new HashMap<>();
+        col1.put("name", "age");
+        col1.put("data_type", "int unsigned");
+        col1.put("nullable", true);
+        col1.put("unique", true);
+        list.add(col1);
 
-        String result = sqlParser.parseCreateTableSQL("db1", "tb1", jsonBody);
+        String result = sqlParser.parseCreateTableSQL("db1", "tb1", list);
 
         assertFalse("SQL should not be blank", StringUtils.isEmpty(result));
         System.out.println(result);
@@ -176,16 +203,43 @@ public class SQLParserTest {
     }
 
     @Test
-    public void createTable_parse_with_index() throws InternalException {
+    public void createTable_parse_index() throws InternalException {
 
-        String jsonBody = "[{\"name\":\"age\",\"type\":\"int unsigned\",\"nullable\":\"true\",\"index\":\"true\"}]";
+        ArrayList<Map<String,Object>> list = new ArrayList<>();
+        Map<String,Object> col1 = new HashMap<>();
+        col1.put("name", "age");
+        col1.put("data_type", "int unsigned");
+        col1.put("nullable", true);
+        col1.put("index", true);
+        list.add(col1);
 
-        String result = sqlParser.parseCreateTableSQL("db1", "tb1", jsonBody);
+        String result = sqlParser.parseCreateTableSQL("db1", "tb1", list);
 
         assertFalse("SQL should not be blank", StringUtils.isEmpty(result));
         System.out.println(result);
         assertEquals(
                 "CREATE TABLE `db1`.`tb1` (`id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,`age` INT UNSIGNED NULL,INDEX `index_age`(`age`));",
+                result);
+    }
+
+    @Test
+    public void createTable_parse_unique_ignore_index() throws InternalException {
+
+        ArrayList<Map<String,Object>> list = new ArrayList<>();
+        Map<String,Object> col1 = new HashMap<>();
+        col1.put("name", "age");
+        col1.put("data_type", "int unsigned");
+        col1.put("nullable", true);
+        col1.put("unique", true);
+        col1.put("index", true);
+        list.add(col1);
+
+        String result = sqlParser.parseCreateTableSQL("db1", "tb1", list);
+
+        assertFalse("SQL should not be blank", StringUtils.isEmpty(result));
+        System.out.println(result);
+        assertEquals(
+                "CREATE TABLE `db1`.`tb1` (`id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,`age` INT UNSIGNED NULL UNIQUE);",
                 result);
     }
 }

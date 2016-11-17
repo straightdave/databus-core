@@ -44,6 +44,26 @@ public class ClientInfo {
     @JsonProperty
     private String clientCategory;
 
+    @JsonProperty
+    private String vendorName;
+
+    @JsonProperty
+    private String vendorExt;
+
+    public ClientInfo(int id, String name, String displayName, String description, int status, String appKey, String sKey, String clientType, String clientCategory, String vendorName, String vendorExt) {
+        this.id = id;
+        this.name = name;
+        this.displayName = displayName;
+        this.description = description;
+        this.status = status;
+        this.appKey = appKey;
+        this.sKey = sKey;
+        this.clientType = clientType;
+        this.clientCategory = clientCategory;
+        this.vendorName = vendorName;
+        this.vendorExt = vendorExt;
+    }
+
     public int getId() {
         return id;
     }
@@ -80,17 +100,12 @@ public class ClientInfo {
         return clientCategory;
     }
 
-    public ClientInfo(int id, String name, String displayName, String description, int status, String appKey,
-                      String sKey, String clientType, String clientCategory) {
-        this.id = id;
-        this.name = name;
-        this.displayName = displayName;
-        this.description = description;
-        this.status = status;
-        this.appKey = appKey;
-        this.sKey = sKey;
-        this.clientType = clientType;
-        this.clientCategory = clientCategory;
+    public String getVendorName() {
+        return vendorName;
+    }
+
+    public String getVendorExt() {
+        return vendorExt;
     }
 
     public ClientInfo() {}
@@ -99,8 +114,14 @@ public class ClientInfo {
     public String toString() {
         return String.format(
                 "{\"id\":\"%s\",\"name\":\"%s\",\"display_name\":\"%s\",\"description\":\"%s\"," +
-                "\"appkey\":\"%s\",\"skey\":\"%s\",\"type\":\"%s\", \"category\":\"%s\"}",
+                "\"appkey\":\"%s\",\"skey\":\"%s\",\"type\":\"%s\", \"category\":\"%s\"," +
+                "\"vendor_name\":\"%s\",\"vendor_ext\":\"%s\"}",
                 this.id, this.name, this.displayName, this.description, this.appKey,
-                this.sKey, this.clientType, this.clientCategory);
+                this.sKey, this.clientType, this.clientCategory, this.vendorName, this.vendorExt);
+    }
+
+    public void hideKeys() {
+        this.appKey = "";
+        this.sKey = "";
     }
 }
