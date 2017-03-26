@@ -14,7 +14,7 @@
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">  
       <!-- rollover daily 配置日志所生成的目录以及生成文件名的规则 -->  
 	  <!-- linux下生成日志文件路径 -->
-<!--       <fileNamePattern>\home\zpark\logs\corelog-%d{yyyy-MM-dd}.%i.log</fileNamePattern> -->
+      <!--<fileNamePattern>\home\zpark\logs\corelog-%d{yyyy-MM-dd}.%i.log</fileNamePattern>-->
  
 	  <!-- windows下生成日志文件路径 -->
       <fileNamePattern>d:\\logs\corelog-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
